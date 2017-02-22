@@ -93,3 +93,15 @@ class DBHandler(object):
 
         entries_table = DBHandler.db.Entries
         return entries_table.find_one({"Date_Modified": date})  # TODO Modify to allow multiple results using find()
+
+    def update_entries(self, id, vals):
+        """Update entries in the Entries_Table
+
+        Args:
+            id:  ID of the entry you want to change
+            vals: New values
+
+        Return:
+        """
+        entries_table = DBHandler.db.Entries
+        entries_table.update({"_id": id}, {"$set": vals})
