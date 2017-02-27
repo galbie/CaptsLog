@@ -1,5 +1,4 @@
 import unittest
-import time
 from captslog.db.DBHandler import DBHandlerClass
 import string
 import random
@@ -38,7 +37,28 @@ class DBHandlerTestClasses(unittest.TestCase):
                          "Test Failed")
 
     def test_insert_to_user_table(self):
-        print "NOT IMPLEMENTED"  # TODO implement test_insert_to_user_table
+        db_handler = DBHandlerClass()
+        test1_name = self.generate_random_strings(5)
+        test1_username = self.generate_random_strings(10)
+        test1_password = self.generate_random_strings(6)
+        test2_name = str("")
+        test2_username = self.generate_random_strings(10)
+        test2_password = self.generate_random_strings(6)
+        test3_name = self.generate_random_strings(5)
+        test3_username = self.generate_random_strings(3)
+        test3_password = self.generate_random_strings(6)
+        test4_name = self.generate_random_strings(5)
+        test4_username = self.generate_random_strings(10)
+        test4_password = self.generate_random_strings(4)
+        print "Running test case 1 with all valid inputs"
+        self.assertTrue(db_handler.insert_to_user_table(test1_name, test1_username, test1_password), "Test Failed")
+        print "Running test case 2 with invalid name and rest valid inputs"
+        self.assertFalse(db_handler.insert_to_user_table(test2_name, test2_username, test2_password), "Test Failed")
+        print "Running test case 3 with invalid username and rest valid inputs"
+        self.assertFalse(db_handler.insert_to_user_table(test3_name, test3_username, test3_password), "Test Failed")
+
+        print "Running test case 4 with invalid password and rest valid inputs"
+        self.assertFalse(db_handler.insert_to_user_table(test4_name, test4_username, test4_password), "Test Failed")
 
     def test_search_entries_by_title(self):
         print "NOT IMPLEMENTED"  # TODO implement test_search_entries_by_title

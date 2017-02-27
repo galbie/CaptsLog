@@ -15,21 +15,35 @@ class DBHandlerClass:
         """Insert Data into the User_Table in the Database
         Args:
             name (str): Name of the User
-            username (str): Username for future logins.
+            username (str): Username for future logins. should be at least 4 characters
             user_password (str): Password for future logins.
 
         Returns:
             bool: True for success or False for failure
 
         """
-
+        if name == str(""):
+            # print "Error!! name Can't be Empty"
+            return False
+        if username == str(""):
+            # print "Error!! username Can't be Empty"
+            return False
+        if len(username) < 4:
+            # print "Error!! username should be at least 4 characters"
+            return False
+        if len(user_password) < 5:
+            # print "Error!! password should be at least 5 characters"
+            return False
         entry = {"Name": name,
                  "Username": username,
                  "User_Password": user_password,
                  "First_Login_Date": time.strftime("%x"),
                  "Last_Login_Date": time.strftime("%x")}
         t = self.db["User_Table"]
-        t.insert_one(entry)
+        if t.insert_one(entry):
+            return True
+
+        return False
 
     def insert_to_entries_table(self, title, tags, content):
         """Insert Data into the Entries_Table in the Database
@@ -54,6 +68,8 @@ class DBHandlerClass:
         t = self.db["Entries_Table"]
         if t.insert_one(entry):
             return True
+
+        return False
 
     def search_entries_by_title(self, title):
         """Search For a Specified Title in the Entries_Table
@@ -98,7 +114,7 @@ class DBHandlerClass:
         entries_table = self.db.Entries
         return entries_table.find_one({"Date_Modified": date})  # TODO Modify to allow multiple results using find()
 
-    def update_entries(self, id, vals):
+    def update_entries(self, _id, vals):
         """Update entries in the Entries_Table
 
         Args:
@@ -108,9 +124,9 @@ class DBHandlerClass:
         Return:
         """
         entries_table = self.db.Entries
-        entries_table.update({"_id": ObjectId(id)}, {"$set": vals})
+        entries_table.update({"_id": ObjectId(_id)}, {"$set": vals})
 
-    def delete_entries(self, id):
+    def delete_entries(self, _id):
         """Delete entries in the Entries_Table
 
         Args:
@@ -119,4 +135,4 @@ class DBHandlerClass:
         Return:
         """
         entries_table = self.db.Entries
-        entries_table.remove_one({"_id": ObjectId(id)})
+        entries_table.remove_one({"_id": ObjectId(_id)})
