@@ -1,11 +1,17 @@
 import pprint
-import pymongo
+from pymongo import MongoClient
+from bson import ObjectId
 
 
-class DBHandler(object):
-    from pymongo import MongoClient
+class DBHandlerClass:
     client = MongoClient()
     db = client['Captains_Log_DB']
+
+    def __init__(self):
+        client = MongoClient()
+        self.db = client['Captains_Log_DB']
+
+
 
     def insert_to_user_table(self, name, username, user_password, first_login_date, last_login_date):
         """Insert Data into the User_Table in the Database
@@ -20,12 +26,13 @@ class DBHandler(object):
             bool: True for success or False for failure
 
         """
+
         entry = {"Name": name,
                  "Username": username,
                  "User_Password": user_password,
                  "First_Login_Date": first_login_date,
                  "Last_Login_Date": last_login_date}
-        t = DBHandler.db["User_Table"]
+        t = self.db["User_Table"]
         t.insert_one(entry)
 
     def insert_to_entries_table(self, title, date_created, last_modified, tags, content):
@@ -42,14 +49,17 @@ class DBHandler(object):
             bool: True for success or False for failure
 
         """
-
+        if title == str(""):
+            # print "Error!! Title Can't be Empty"
+            return False
         entry = {"Title": title,
                  "Date_Created": date_created,
                  "Last_Modified": last_modified,
                  "Tags": tags,
                  "Content": content}  # TODO reformat the 'content' variable to include the Markup file
-        t = DBHandler.db["Entries_Table"]
-        t.insert_one(entry)
+        t = self.db["Entries_Table"]
+        if t.insert_one(entry):
+            return True
 
     def search_entries_by_title(self, title):
         """Search For a Specified Title in the Entries_Table
@@ -62,7 +72,7 @@ class DBHandler(object):
 
         """
 
-        entries_table = DBHandler.db.Entries
+        entries_table = self.db.Entries
         return entries_table.find_one({"Title": title})  # TODO Modify to allow multiple results using find(),
         # TODO also find similar results which are not exact matches
 
@@ -77,7 +87,7 @@ class DBHandler(object):
 
         """
 
-        entries_table = DBHandler.db.Entries
+        entries_table = self.db.Entries
         return entries_table.find_one({"Date_Created": date})  # TODO Modify to allow multiple results using find()
 
     def search_entries_by_modified_date(self, date):
@@ -91,17 +101,28 @@ class DBHandler(object):
 
         """
 
-        entries_table = DBHandler.db.Entries
+        entries_table = self.db.Entries
         return entries_table.find_one({"Date_Modified": date})  # TODO Modify to allow multiple results using find()
 
     def update_entries(self, id, vals):
         """Update entries in the Entries_Table
 
         Args:
-            id:  ID of the entry you want to change
+            id:  ObjectID of the entry you want to change
             vals: New values
 
         Return:
         """
-        entries_table = DBHandler.db.Entries
-        entries_table.update({"_id": id}, {"$set": vals})
+        entries_table = self.db.Entries
+        entries_table.update({"_id": ObjectId(id)}, {"$set": vals})
+
+    def delete_entries(self, id):
+        """Delete entries in the Entries_Table
+
+        Args:
+            id:  Object ID of the entry you want to change
+
+        Return:
+        """
+        entries_table = self.db.Entries
+        entries_table.remove_one({"_id": ObjectId(id)})
