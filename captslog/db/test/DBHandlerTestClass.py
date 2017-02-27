@@ -1,7 +1,5 @@
 import unittest
-
 import time
-
 from captslog.db.DBHandler import DBHandlerClass
 import string
 import random
@@ -31,13 +29,13 @@ class DBHandlerTestClasses(unittest.TestCase):
         test1_title = self.generate_random_strings(10)
         test2_title = str("")
         print "Test Case one with a non-Null Title "
-        self.assertTrue(db_handler.insert_to_entries_table(test1_title, time.strftime("%x"), time.strftime("%x"),
-                                                           [self.generate_random_strings(4),
-                                                            self.generate_random_strings(4)], "File"), "Test Failed")
+        self.assertTrue(db_handler.insert_to_entries_table(test1_title, [self.generate_random_strings(4),
+                                                                         self.generate_random_strings(4)], "File"),
+                        "Test Failed")
         print "Test Case two with a Null Title "
-        self.assertFalse(db_handler.insert_to_entries_table(test2_title, time.strftime("%x"), time.strftime("%x"),
-                                                            [self.generate_random_strings(4),
-                                                             self.generate_random_strings(4)], "File"), "Test Failed")
+        self.assertFalse(db_handler.insert_to_entries_table(test2_title, [self.generate_random_strings(4),
+                                                                          self.generate_random_strings(4)], "File"),
+                         "Test Failed")
 
     def test_insert_to_user_table(self):
         print "NOT IMPLEMENTED"  # TODO implement test_insert_to_user_table

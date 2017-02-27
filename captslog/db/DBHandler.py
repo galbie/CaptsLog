@@ -1,7 +1,7 @@
 import pprint
 from pymongo import MongoClient
 from bson import ObjectId
-
+import time
 
 class DBHandlerClass:
     client = MongoClient()
@@ -11,16 +11,12 @@ class DBHandlerClass:
         client = MongoClient()
         self.db = client['Captains_Log_DB']
 
-
-
-    def insert_to_user_table(self, name, username, user_password, first_login_date, last_login_date):
+    def insert_to_user_table(self, name, username, user_password):
         """Insert Data into the User_Table in the Database
         Args:
             name (str): Name of the User
             username (str): Username for future logins.
             user_password (str): Password for future logins.
-            first_login_date (date): Date the user was first created
-            last_login_date (date): Last Login date of the user
 
         Returns:
             bool: True for success or False for failure
@@ -30,18 +26,16 @@ class DBHandlerClass:
         entry = {"Name": name,
                  "Username": username,
                  "User_Password": user_password,
-                 "First_Login_Date": first_login_date,
-                 "Last_Login_Date": last_login_date}
+                 "First_Login_Date": time.strftime("%x"),
+                 "Last_Login_Date": time.strftime("%x")}
         t = self.db["User_Table"]
         t.insert_one(entry)
 
-    def insert_to_entries_table(self, title, date_created, last_modified, tags, content):
+    def insert_to_entries_table(self, title, tags, content):
         """Insert Data into the Entries_Table in the Database
 
         Args:
             title (str): Title of the Journel Entry
-            date_created (date): Date the Entry was created
-            last_modified (date): Date the Entry was last Modified
             tags (list): Tangs for the Entry
             content(str): Content of the Entry
 
@@ -53,10 +47,10 @@ class DBHandlerClass:
             # print "Error!! Title Can't be Empty"
             return False
         entry = {"Title": title,
-                 "Date_Created": date_created,
-                 "Last_Modified": last_modified,
+                 "Date_Created": time.strftime("%x"),
+                 "Last_Modified": time.strftime("%x"),
                  "Tags": tags,
-                 "Content": content}  # TODO reformat the 'content' variable to include the Markup file
+                 "Content": content}  # TODO reformat the 'content' variable to include the Markup file (data = Binary(open(content).read()))
         t = self.db["Entries_Table"]
         if t.insert_one(entry):
             return True
