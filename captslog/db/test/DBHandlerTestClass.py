@@ -24,15 +24,26 @@ class DBHandlerTestClasses(unittest.TestCase):
         return str_val
 
     def test_insert_to_entries_table(self, ):
-        db_handler = DBHandlerClass()
         test1_title = self.generate_random_strings(10)
-        test2_title = str("")
+        test1_tag = [self.generate_random_strings(4), self.generate_random_strings(3)]
+        test1_content = "File"
+        test2_title = self.generate_random_strings(10)
+        test2_tag = [self.generate_random_strings(4), self.generate_random_strings(3)]
+        test2_content = None
+        test3_title = self.generate_random_strings(10)
+        test3_tag = []
+        test3_content = "File"
+        test4_title = ""
+        test4_tag = [self.generate_random_strings(4), self.generate_random_strings(3)]
+        test4_content = "File"  # TODO implement the new test cases
+        db_handler = DBHandlerClass()
         print "Test Case one with a non-Null Title "
-        self.assertTrue(db_handler.insert_to_entries_table(test1_title, [self.generate_random_strings(4),
+        self.assertTrue(
+            db_handler.insert_to_entries_table(self.generate_random_strings(10), [self.generate_random_strings(4),
                                                                          self.generate_random_strings(4)], "File"),
                         "Test Failed")
         print "Test Case two with a Null Title "
-        self.assertFalse(db_handler.insert_to_entries_table(test2_title, [self.generate_random_strings(4),
+        self.assertFalse(db_handler.insert_to_entries_table("", [self.generate_random_strings(4),
                                                                           self.generate_random_strings(4)], "File"),
                          "Test Failed")
 
@@ -61,7 +72,16 @@ class DBHandlerTestClasses(unittest.TestCase):
         self.assertFalse(db_handler.insert_to_user_table(test4_name, test4_username, test4_password), "Test Failed")
 
     def test_search_entries_by_title(self):
-        print "NOT IMPLEMENTED"  # TODO implement test_search_entries_by_title
+        db_handler = DBHandlerClass()
+        test1_title = self.generate_random_strings(10)
+        test1_tag = [self.generate_random_strings(4), self.generate_random_strings(3)]
+        test1_content = "File"
+        db_handler.insert_to_entries_table(test1_title, test1_tag, test1_content)
+        result1 = db_handler.search_entries_by_title(test1_title)
+        result2 = db_handler.search_entries_by_title(self.generate_random_strings(5))
+
+        self.assertTrue(result1["Title"] == test1_title, "Test Failed")  # TODO implement test_search_entries_by_title
+        self.assertTrue(result2 == None, "Test Failed")
 
     def test_search_entries_by_created_date(self):
         print "NOT IMPLEMENTED"  # TODO implement test_search_entries_by_created_date
