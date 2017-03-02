@@ -1,4 +1,6 @@
 import pprint
+from datetime import datetime
+
 from pymongo import MongoClient
 from bson import ObjectId
 import time
@@ -82,8 +84,9 @@ class DBHandlerClass:
 
         """
 
-        entries_table = self.db.Entries
-        return entries_table.find_one({"Title": title})  # TODO Modify to allow multiple results using find(),
+        entries_table = self.db["Entries_Table"]
+        result = entries_table.find_one({"Title": title})
+        return result  # TODO Modify to allow multiple results using find(),
         # TODO also find similar results which are not exact matches
 
     def search_entries_by_created_date(self, date):
@@ -96,8 +99,10 @@ class DBHandlerClass:
             dict: the search result
 
         """
-
-        entries_table = self.db.Entries
+        d = datetime.strptime(date, '%m/%d/%y')
+        if d > datetime.now():
+            return False
+        entries_table = self.db["Entries_Table"]
         return entries_table.find_one({"Date_Created": date})  # TODO Modify to allow multiple results using find()
 
     def search_entries_by_modified_date(self, date):
@@ -111,7 +116,7 @@ class DBHandlerClass:
 
         """
 
-        entries_table = self.db.Entries
+        entries_table = self.db["Entries_Table"]
         return entries_table.find_one({"Date_Modified": date})  # TODO Modify to allow multiple results using find()
 
     def update_entries(self, _id, vals):
@@ -123,7 +128,7 @@ class DBHandlerClass:
 
         Return:
         """
-        entries_table = self.db.Entries
+        entries_table = self.db["Entries_Table"]
         entries_table.update({"_id": ObjectId(_id)}, {"$set": vals})
 
     def delete_entries(self, _id):
@@ -134,5 +139,8 @@ class DBHandlerClass:
 
         Return:
         """
-        entries_table = self.db.Entries
+        entries_table = self.db["Entries_Table"]
         entries_table.remove_one({"_id": ObjectId(_id)})
+
+
+dbh = DBHandlerClass()
