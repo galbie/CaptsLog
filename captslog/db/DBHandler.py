@@ -99,6 +99,7 @@ class DBHandlerClass:
             dict: the search result
 
         """
+
         d = datetime.strptime(date, '%m/%d/%y')
         if d > datetime.now():
             return False
@@ -116,6 +117,9 @@ class DBHandlerClass:
 
         """
 
+        d = datetime.strptime(date, '%m/%d/%y')
+        if d > datetime.now():
+            return False
         entries_table = self.db["Entries_Table"]
         return entries_table.find_one({"Date_Modified": date})  # TODO Modify to allow multiple results using find()
 
@@ -128,6 +132,7 @@ class DBHandlerClass:
 
         Return:
         """
+
         entries_table = self.db["Entries_Table"]
         entries_table.update({"_id": ObjectId(_id)}, {"$set": vals})
 
