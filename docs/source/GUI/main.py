@@ -11,23 +11,29 @@ from PySide import QtCore, QtGui
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName("Captslog Main")
         MainWindow.resize(800, 600)
+		
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+		
         self.listView = QtGui.QListView(self.centralwidget)
         self.listView.setGeometry(QtCore.QRect(0, 0, 191, 581))
         self.listView.setObjectName("listView")
+		
         self.textBrowser = QtGui.QTextBrowser(self.centralwidget)
         self.textBrowser.setGeometry(QtCore.QRect(200, 0, 311, 561))
         self.textBrowser.setObjectName("textBrowser")
+		
         self.graphicsView = QtGui.QGraphicsView(self.centralwidget)
         self.graphicsView.setGeometry(QtCore.QRect(520, 0, 281, 571))
         self.graphicsView.setObjectName("graphicsView")
+		
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
         self.menubar.setObjectName("menubar")
+		
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
