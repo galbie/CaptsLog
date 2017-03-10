@@ -54,8 +54,8 @@ class DBHandlerTestClasses(unittest.TestCase):
         self.assertFalse(
             db_handler.insert_to_entries_table(
                 "", [self.generate_random_strings(4),
-                     self.generate_random_strings(4)], "File")
-            , "Test Failed")
+                     self.generate_random_strings(4)], "File"),
+            "Test Failed")
 
     def test_insert_to_user_table(self):
         db_handler = DBHandlerClass()
