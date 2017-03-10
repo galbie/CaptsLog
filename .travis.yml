@@ -9,7 +9,7 @@ before_script:
     # Something
 script:
     # - python tests.py
-    - py.test source/tests/tests.py --pep8 source/tests/ -v --cov source/tests/ --cov-report term-missing
+    - py.test source --pep8=source -v --cov=source tests/ --cov-report term-missing
 
 after_success:
     - coveralls
