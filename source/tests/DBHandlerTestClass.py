@@ -52,11 +52,10 @@ class DBHandlerTestClasses(unittest.TestCase):
                  self.generate_random_strings(4)], "File"), "Test Failed")
         print "Test Case two with a Null Title "
         self.assertFalse(
-            db_handler.insert_to_entries_table("",
-                                               [self.generate_random_strings(4)
-                                                   ,
-                                                self.generate_random_strings(4)]
-                                               , "File"), "Test Failed")
+            db_handler.insert_to_entries_table(
+                "", [self.generate_random_strings(4),
+                     self.generate_random_strings(4)], "File")
+            , "Test Failed")
 
     def test_insert_to_user_table(self):
         db_handler = DBHandlerClass()
@@ -120,20 +119,23 @@ class DBHandlerTestClasses(unittest.TestCase):
         db_handler = DBHandlerClass()
         date = datetime.datetime.now()
         date += datetime.timedelta(days=1)
-        self.assertFalse(db_handler.search_entries_by_created_date(date), "Test Failed")
+        self.assertTrue(
+            int(db_handler.search_entries_by_created_date(date)) == int(0),
+            "Test Failed")
         entry = db_handler.support_func_get_all(1)[0]
         self.assertTrue(not (db_handler.search_entries_by_created_date(
-            entry["Date_Created"]) == False), "Test Failed")
+            entry["Date_Created"]) == 0), "Test Failed")
 
     def test_search_entries_by_modified_date(self):
         db_handler = DBHandlerClass()
         date = datetime.datetime.now()
         date += datetime.timedelta(days=1)
-        self.assertFalse(db_handler.search_entries_by_modified_date(date),
-                         "Test Failed")
+        self.assertTrue(
+            int(db_handler.search_entries_by_modified_date(date)) == int(0),
+            "Test Failed")
         entry = db_handler.support_func_get_all(1)[0]
         self.assertTrue(not (db_handler.search_entries_by_modified_date(
-            entry["Last_Modified"]) == False),
+            entry["Last_Modified"]) == 0),
                         "Test Failed")
 
     def test_update_entries(self):
