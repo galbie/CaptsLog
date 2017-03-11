@@ -27,16 +27,16 @@ class DBHandlerClass:
 
         if name == str(""):
             # print "Error!! name Can't be Empty"
-            return False
+            return 0
         if username == str(""):
             # print "Error!! username Can't be Empty"
-            return False
+            return 0
         if len(username) < 4:
             # print "Error!! username should be at least 4 characters"
-            return False
+            return 0
         if len(user_password) < 5:
             # print "Error!! password should be at least 5 characters"
-            return False
+            return 0
         entry = {"Name": name,
                  "Username": username,
                  "User_Password": user_password,
@@ -44,7 +44,7 @@ class DBHandlerClass:
                  "Last_Login_Date": datetime.now()}
         t = self.db["User_Table"]
         if t.insert_one(entry):
-            return True
+            return 1
 
     def insert_to_entries_table(self, title, tags, content):
         """Insert Data into the Entries_Table in the Database
@@ -55,12 +55,12 @@ class DBHandlerClass:
             content(str): Content of the Entry
 
         return:
-            bool: True for success or False for failure
+            int: 1 for success or 0 for failure
 
         """
         if title == str(""):
             # print "Error!! Title Can't be Empty"
-            return False
+            return 0
         entry = {"Title": title,
                  "Date_Created": datetime.now(),
                  "Last_Modified": datetime.now(),
@@ -68,7 +68,7 @@ class DBHandlerClass:
                  "Content": content}  # TODO reformat the 'content' variable to include the Markup file (data = Binary(open(content).read()))
         t = self.db["Entries_Table"]
         if t.insert_one(entry):
-            return True
+            return 1
 
         return False
 
@@ -103,7 +103,7 @@ class DBHandlerClass:
             entries_table = self.db["Entries_Table"]
             return entries_table.find_one({"Date_Created": date})  # TODO Modify to allow multiple results using find()
 
-        return False
+        return int(0)
 
     def search_entries_by_modified_date(self, date):
         """Search For Entries modified on the specified Date in the Entries_Table
@@ -118,7 +118,7 @@ class DBHandlerClass:
         if date.date() <= datetime.now().date():
             entries_table = self.db["Entries_Table"]
             return entries_table.find_one({"Last_Modified": date})  # TODO Modify to allow multiple results using find()
-        return False
+        return int(0)
 
     def update_entries(self, _id, vals):
         """Update entries in the Entries_Table
@@ -128,16 +128,16 @@ class DBHandlerClass:
             vals: New values
 
         Return:
-             bool:true if the update was successful. False if it fails
+             int:1 if the update was successful. 0 if it fails
         """
 
         entries_table = self.db["Entries_Table"]
         if not entries_table.find_one({"_id": ObjectId(_id)}):
-            print "The specified entry does not Exist"
-            return False
+            # print "The specified entry does not Exist"
+            return 0
         vals["Last_Modified"] = datetime.now()
         entries_table.update_one({"_id": ObjectId(_id)}, {"$set": vals})
-        return True
+        return 1
 
     def delete_entries(self, _id):
         """Delete entries in the Entries_Table
@@ -146,15 +146,15 @@ class DBHandlerClass:
             _id:  Object ID of the entry you want to change
 
         Return:
-            bool:true if the delete was successful. False if it fails
+            bool:1 if the delete was successful. 0 if it fails
         """
 
         entries_table = self.db["Entries_Table"]
         if not entries_table.find_one({"_id": ObjectId(_id)}):
-            print "The specified entry does not Exist"
-            return False
+            # print "The specified entry does not Exist"
+            return 0
         entries_table.delete_one({"_id": ObjectId(_id)})
-        return True
+        return 1
 
     def support_func_get_all(self, lim):
         """This is just a support function which returns all the data in the Entries table upto a specified limit
