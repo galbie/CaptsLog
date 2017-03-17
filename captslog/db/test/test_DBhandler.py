@@ -2,7 +2,7 @@ import datetime
 import random
 import string
 from bson import ObjectId
-from source.db.DBHandler import DBHandlerClass
+from captslog.db.DBHandler import DBHandlerClass
 import pytest
 
 lower_case = string.ascii_lowercase
