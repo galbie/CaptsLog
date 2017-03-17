@@ -1,3 +1,4 @@
 .cache/v/cache/lastfailed
 venv/*
 *.pyc
+.cache/*

@@ -9,7 +9,8 @@ before_script:
     # Something
 script:
     # - python tests.py
-    - py.test source --pep8=source -v --cov=source tests/ --cov-report term-missing
+    - py.test captslog --cov=captslog --ignore=captslog/example_google.py
 
 after_success:
-    - coveralls
+    - flake8 captslog
+    - codecov
