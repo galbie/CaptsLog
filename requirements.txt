@@ -7,4 +7,3 @@ sphinxcontrib-napoleon
 coverage
 flake8
 codecov
-bson
