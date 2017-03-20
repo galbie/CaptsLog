@@ -83,8 +83,6 @@ coverage:
 
 
   ignore:          # files and folders that will be removed during processing
-    - "captslog/example_google.py"
-    - "example_google.py"
 
   fixes:           # [advanced] in rare cases the report tree is invalid, specify adjustments here
     - "old_path::new_path"

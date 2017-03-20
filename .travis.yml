@@ -9,7 +9,7 @@ before_script:
     # Something
 script:
     # - python tests.py
-    - py.test captslog --cov=captslog --ignore=captslog/example_google.py
+    - py.test captslog --cov=captslog
 
 after_success:
     - flake8 captslog
