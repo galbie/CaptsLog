@@ -1,9 +1,10 @@
 import datetime
 import random
 import string
+
 from bson import ObjectId
-from source.db.DBHandler import DBHandlerClass
-import pytest
+
+from captslog.db.DBHandler import DBHandlerClass
 
 lower_case = string.ascii_lowercase
 upper_case = string.ascii_uppercase

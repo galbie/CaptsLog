@@ -166,3 +166,5 @@ class DBHandlerClass:
         """
         entries_table = self.db["Entries_Table"]
         return entries_table.find().limit(lim)
+
+        # TODO Save the Entire text in the MArkdown file instead of the markdown file itself
