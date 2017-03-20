@@ -1,8 +1,7 @@
 import datetime
 import random
 import string
-
-from bson import ObjectId
+import bson.objectid
 
 from captslog.db.DBHandler import DBHandlerClass
 
@@ -139,7 +138,7 @@ def test_update_entries():
     entry["Title"] = str(entry["Title"]) + str("1")
     assert db_handler.update_entries(entry["_id"], entry) == 1
     assert db_handler.update_entries(
-        ObjectId("111111111111111111111111"), entry) == 0
+        bson.objectid.ObjectId("111111111111111111111111"), entry) == 0
 
 
 def test_delete_entries():
