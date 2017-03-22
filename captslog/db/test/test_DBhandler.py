@@ -46,11 +46,11 @@ def test_insert_to_entries_table():
     assert db_handler.insert_to_entries_table(
         generate_random_strings(10),
         [generate_random_strings(4),
-         generate_random_strings(4)], "File") == 1
+         generate_random_strings(4)], "File")
     # print "Test Case two with a Null Title "
-    assert db_handler.insert_to_entries_table(
+    assert not db_handler.insert_to_entries_table(
         "", [generate_random_strings(4),
-             generate_random_strings(4)], "File") == 0
+             generate_random_strings(4)], "File")
 
 
 def test_insert_to_user_table():
@@ -71,26 +71,31 @@ def test_insert_to_user_table():
     test5_username = ""
     test5_password = generate_random_strings(6)
     # print "Running test case 1 with all valid inputs"
-    assert db_handler.insert_to_user_table(test1_name,
-                                           test1_username,
-                                           test1_password) == 1
+    value1 = db_handler.insert_to_user_table(test1_name,
+                                             test1_username,
+                                             test1_password)
+    assert value1
     # print "Running test case 2 with invalid name and rest valid inputs"
-    assert db_handler.insert_to_user_table(test2_name,
+    val2 = db_handler.insert_to_user_table(test2_name,
                                            test2_username,
-                                           test2_password) == 0
+                                           test2_password)
+    assert not val2
     # print "Running test case 3 with " \
     # "invalid username and rest valid inputs"
-    assert db_handler.insert_to_user_table(test3_name,
+    val3 = db_handler.insert_to_user_table(test3_name,
                                            test3_username,
-                                           test3_password) == 0
+                                           test3_password)
+    assert not val3
     # print "Running test case 4 with invalid password and rest valid inputs"
-    assert db_handler.insert_to_user_table(test4_name,
+    val4 = db_handler.insert_to_user_table(test4_name,
                                            test4_username,
-                                           test4_password) == 0
+                                           test4_password)
+    assert not val4
     # print "Running test case 5 with Empty Username and rest valid inputs"
-    assert db_handler.insert_to_user_table(test5_name,
+    val5 = db_handler.insert_to_user_table(test5_name,
                                            test5_username,
-                                           test5_password) == 0
+                                           test5_password)
+    assert not val5
 
 
 def test_search_entries_by_title():
@@ -104,45 +109,69 @@ def test_search_entries_by_title():
     result1 = db_handler.search_entries_by_title(test1_title)
     result2 = db_handler.search_entries_by_title(
         generate_random_strings(5))
-
-    assert result1["Title"] == test1_title
+    r1 = True
+    rr1 = False
     r2 = False
-    if result2 is None:
-        r2 = True
-    assert r2
+    print result1
+    if not isinstance(result1, bool):
+        r1 = False
+        print result1 is not bool
+        if result1["Title"] == test1_title:
+            rr1 = True
+        if result2 is None:
+            r2 = True
+    assert rr1 or r1
+    assert r2 or r1
 
 
 def test_search_entries_by_created_date():
     db_handler = DBHandlerClass()
     date = datetime.datetime.now()
     date += datetime.timedelta(days=1)
-    assert int(db_handler.search_entries_by_created_date(date)) == int(0)
-    entry = db_handler.support_func_get_all(1)[0]
-    assert not (db_handler.search_entries_by_created_date(
-        entry["Date_Created"]) == 0)
+    assert not db_handler.search_entries_by_created_date(date)
+    entry = db_handler.support_func_get_all(1)
+    # print entry
+    # print isinstance(entry, bool)
+    if (not isinstance(entry, bool)):
+        # print entry
+        result = db_handler.search_entries_by_created_date(
+            entry[0]["Date_Created"])
+        if isinstance(result, bool):
+            assert result
+        else:
+            assert result is not None
 
 
 def test_search_entries_by_modified_date():
     db_handler = DBHandlerClass()
     date = datetime.datetime.now()
     date += datetime.timedelta(days=1)
-    assert int(db_handler.search_entries_by_modified_date(date)) == int(0)
-    entry = db_handler.support_func_get_all(1)[0]
-    assert not (db_handler.search_entries_by_modified_date(
-        entry["Last_Modified"]) == 0)
+    assert not db_handler.search_entries_by_modified_date(date)
+    entry = db_handler.support_func_get_all(1)
+    if not isinstance(entry, bool):
+        result = db_handler.search_entries_by_modified_date(
+            entry[0]["Last_Modified"])
+        if isinstance(result, bool):
+            assert result
+        else:
+            assert result is not None
 
 
 def test_update_entries():
     db_handler = DBHandlerClass()
-    entry = db_handler.support_func_get_all(1)[0]
-    entry["Title"] = str(entry["Title"]) + str("1")
-    assert db_handler.update_entries(entry["_id"], entry) == 1
-    assert db_handler.update_entries(
-        bson.objectid.ObjectId("111111111111111111111111"), entry) == 0
+    entry = db_handler.support_func_get_all(1)
+    if not isinstance(entry, bool):
+        entry = entry[0]
+        entry["Title"] = str(entry["Title"]) + str("1")
+        assert db_handler.update_entries(entry["_id"], entry)
+        assert not db_handler.update_entries(
+            bson.objectid.ObjectId("111111111111111111111111"), entry)
 
 
 def test_delete_entries():
     db_handler = DBHandlerClass()
-    entry = db_handler.support_func_get_all(3)[0]
-    assert db_handler.delete_entries(entry["_id"]) == 1
-    assert db_handler.delete_entries("111111111111111111111111") == 0
+    entry = db_handler.support_func_get_all(3)
+    if not isinstance(entry, bool):
+        entry = entry[0]
+        assert db_handler.delete_entries(entry["_id"])
+        assert not db_handler.delete_entries("111111111111111111111111")
