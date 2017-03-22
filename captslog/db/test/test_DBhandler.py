@@ -112,7 +112,6 @@ def test_search_entries_by_title():
     r1 = True
     rr1 = False
     r2 = False
-    print result1
     if not isinstance(result1, bool):
         r1 = False
         if result1["Title"] == test1_title:
