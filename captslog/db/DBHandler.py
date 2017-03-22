@@ -74,7 +74,9 @@ class DBHandlerClass:
                  "Date_Created": datetime.now(),
                  "Last_Modified": datetime.now(),
                  "Tags": tags,
-                 "Content": content}  # TODO reformat the 'content' variable to include the Markup file (data = Binary(open(content).read()))
+                 "Content": content}
+        # TODO reformat the 'content'
+        # variable to include the Markup file (data = Binary(open(content).read()))
         t = self.db["Entries_Table"]
         try:
             if t.insert_one(entry):
