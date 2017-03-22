@@ -174,4 +174,5 @@ def test_delete_entries():
     if not isinstance(entry, bool):
         entry = entry[0]
         assert db_handler.delete_entries(entry["_id"])
-        assert not db_handler.delete_entries("111111111111111111111111")
+        assert not db_handler.delete_entries(
+            "111111111111111111111111")
