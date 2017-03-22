@@ -125,12 +125,14 @@ def test_search_entries_by_title():
 def test_search_entries_by_created_date():
     db_handler = DBHandlerClass()
     date = datetime.datetime.now()
+    date1 = date - datetime.timedelta(days=1)
     date += datetime.timedelta(days=1)
     assert not db_handler.search_entries_by_created_date(date)
+    assert db_handler.search_entries_by_created_date(date1)
     entry = db_handler.support_func_get_all(1)
     # print entry
     # print isinstance(entry, bool)
-    if (not isinstance(entry, bool)):
+    if not isinstance(entry, bool):
         # print entry
         result = db_handler.search_entries_by_created_date(
             entry[0]["Date_Created"])
