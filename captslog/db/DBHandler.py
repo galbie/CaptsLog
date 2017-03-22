@@ -9,8 +9,6 @@ import time
 class DBHandlerClass:
     client = MongoClient()
     db = client['Captains_Log_DB']
-    print client
-    print db
 
     def __init__(self):
         client = MongoClient()
@@ -51,8 +49,8 @@ class DBHandlerClass:
             else:
                 return False
         except pymongo.errors.ServerSelectionTimeoutError:
-            print 'ERROR : No connection could be made because' \
-                  ' the target machine actively refused it'
+            print('ERROR : No connection could be made because'
+                  ' the target machine actively refused it')
             return True
 
     def insert_to_entries_table(self, title, tags, content):
@@ -84,8 +82,8 @@ class DBHandlerClass:
             else:
                 return False
         except pymongo.errors.ServerSelectionTimeoutError:
-            print 'ERROR : No connection could be made because' \
-                  ' the target machine actively refused it'
+            print('ERROR : No connection could be made because'
+                  ' the target machine actively refused it')
             return True
 
     def search_entries_by_title(self, title):
@@ -104,8 +102,8 @@ class DBHandlerClass:
             result = entries_table.find_one({"Title": title})
             return result
         except pymongo.errors.ServerSelectionTimeoutError:
-            print 'ERROR : No connection could be made because' \
-                  ' the target machine actively refused it'
+            print('ERROR : No connection could be made because'
+                  ' the target machine actively refused it')
             return False
             # TODO Modify to allow multiple results using find(),
             # TODO also find similar results which are not exact matches
@@ -128,8 +126,8 @@ class DBHandlerClass:
                     {"Date_Created": date})
                 # TODO Modify to allow multiple results using find()
             except pymongo.errors.ServerSelectionTimeoutError:
-                print 'ERROR : No connection could be made because' \
-                      ' the target machine actively refused it'
+                print('ERROR : No connection could be made because'
+                      ' the target machine actively refused it')
                 return True
         return False
 
@@ -149,8 +147,8 @@ class DBHandlerClass:
                 return entries_table.find_one(
                     {"Last_Modified": date})  # TODO Modify to allow multiple results using find()
             except pymongo.errors.ServerSelectionTimeoutError:
-                print 'ERROR : No connection could be made because' \
-                      ' the target machine actively refused it'
+                print('ERROR : No connection could be made because'
+                      ' the target machine actively refused it')
                 return True
         return False
 
@@ -175,8 +173,8 @@ class DBHandlerClass:
                                      {"$set": vals})
             return True
         except pymongo.errors.ServerSelectionTimeoutError:
-            print 'ERROR : No connection could be made because' \
-                  ' the target machine actively refused it'
+            print('ERROR : No connection could be made because'
+                  ' the target machine actively refused it')
             return True
 
     def delete_entries(self, _id):
@@ -197,8 +195,8 @@ class DBHandlerClass:
             entries_table.delete_one({"_id": ObjectId(_id)})
             return True
         except pymongo.errors.ServerSelectionTimeoutError:
-            print 'ERROR : No connection could be made because the ' \
-                  'target machine actively refused it'
+            print('ERROR : No connection could be made because'
+                  ' the target machine actively refused it')
             return True
 
     def support_func_get_all(self, lim):
@@ -213,10 +211,10 @@ class DBHandlerClass:
         try:
             entries_table = self.db["Entries_Table"]
             result = entries_table.find().limit(lim)
-            print result[0]
+            print(result[0])
             return result
         except pymongo.errors.ServerSelectionTimeoutError:
-            print 'ERROR : No connection could be made because ' \
-                  'the target machine actively refused it'
+            print('ERROR : No connection could be made because'
+                  'the target machine actively refused it')
             return False
             # TODO Save the Entire text in the MArkdown file instead of the markdown file itself
