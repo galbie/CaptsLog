@@ -159,18 +159,23 @@ def test_search_entries_by_modified_date():
 
 def test_update_entries():
     db_handler = DBHandlerClass()
+    entry1 = {"Title": "Modified Title",
+              "Date_Created": datetime.datetime.now(),
+              "Last_Modified": datetime.datetime.now(),
+              "Tags": ["MTag1", "MTag2"],
+              "Content": "Content in Markdown File"}
+    assert not db_handler.update_entries(
+        bson.objectid.ObjectId("111111111111111111111111"), entry1)
     entry = db_handler.support_func_get_all(1)
     if not isinstance(entry, bool):
         entry = entry[0]
         entry["Title"] = str(entry["Title"]) + str("1")
         assert db_handler.update_entries(entry[0]["_id"], entry)
-        assert not db_handler.update_entries(
-            bson.objectid.ObjectId("111111111111111111111111"), entry)
 
 
 def test_delete_entries():
     db_handler = DBHandlerClass()
-    assert db_handler.delete_entries(
+    assert not db_handler.delete_entries(
         "111111111111111111111111")
     entry = db_handler.support_func_get_all(3)
     if not isinstance(entry, bool):
