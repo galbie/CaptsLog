@@ -163,16 +163,16 @@ def test_update_entries():
     if not isinstance(entry, bool):
         entry = entry[0]
         entry["Title"] = str(entry["Title"]) + str("1")
-        assert db_handler.update_entries(entry["_id"], entry)
+        assert db_handler.update_entries(entry[0]["_id"], entry)
         assert not db_handler.update_entries(
             bson.objectid.ObjectId("111111111111111111111111"), entry)
 
 
 def test_delete_entries():
     db_handler = DBHandlerClass()
+    assert db_handler.delete_entries(
+        "111111111111111111111111")
     entry = db_handler.support_func_get_all(3)
     if not isinstance(entry, bool):
         entry = entry[0]
-        assert db_handler.delete_entries(entry["_id"])
-        assert not db_handler.delete_entries(
-            "111111111111111111111111")
+        assert db_handler.delete_entries(entry[0]["_id"])
