@@ -12,3 +12,10 @@ class MainWindow(gui.QMainWindow):
 		raw = self.ui.txtInput.toPlainText()
 		md = self.markdown.convert(raw)
 		self.ui.txtOutput.setHtml(md)
+
+
+if __name__ == "__main__":
+    app = QtGui.QApplication(sys.argv)
+    myMain = MainWindow()
+    myMain.show()
+    sys.exit(app.exec_())		
