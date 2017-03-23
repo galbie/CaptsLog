@@ -175,7 +175,7 @@ class DBHandlerClass:
         except pymongo.errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   ' the target machine actively refused it')
-            return True
+            return False
 
     def delete_entries(self, _id):
         """Delete entries in the Entries_Table
@@ -197,7 +197,7 @@ class DBHandlerClass:
         except pymongo.errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   ' the target machine actively refused it')
-            return True
+            return False
 
     def support_func_get_all(self, lim):
         """This is just a support function which returns all the data in the Entries table upto a specified limit
