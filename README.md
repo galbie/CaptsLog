@@ -1,7 +1,4 @@
 # CaptsLog
-[![Coverage Status](https://coveralls.io/repos/github/jaehoonhwang/CaptsLog/badge.svg?branch=master)](https://coveralls.io/github/jaehoonhwang/CaptsLog?branch=master)
+[![codecov](https://codecov.io/gh/jaehoonhwang/CaptsLog/branch/master/graph/badge.svg)](https://codecov.io/gh/jaehoonhwang/CaptsLog) [![Build Status](https://travis-ci.org/jaehoonhwang/CaptsLog.svg?branch=master)](https://travis-ci.org/jaehoonhwang/CaptsLog)
 
-[![Build Status](https://travis-ci.org/jaehoonhwang/CaptsLog.svg?branch=master)](https://travis-ci.org/jaehoonhwang/CaptsLog)
-
-Journal application using python
-
+Journal Application using python
