@@ -165,10 +165,10 @@ class DBHandlerClass:
 
         entries_table = self.db["Entries_Table"]
         try:
+            vals["Last_Modified"] = datetime.now()
             if not entries_table.find_one({"_id": ObjectId(_id)}):
                 # print "The specified entry does not Exist"
                 return False
-            vals["Last_Modified"] = datetime.now()
             entries_table.update_one({"_id": ObjectId(_id)},
                                      {"$set": vals})
             return True
