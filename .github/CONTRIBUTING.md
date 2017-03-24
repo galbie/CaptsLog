@@ -69,6 +69,7 @@ Example: `[Test](#15) Announcements`
 - [Feature]: Any feature we might add
 - [Bug]: Bug fixes
 - [Test]: Anything test related
+- [Doc]: Documentation Related
 
 **Number**:
 Issue number referencing the pull request.
