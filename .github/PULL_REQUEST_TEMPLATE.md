@@ -10,3 +10,18 @@ Example:
 git commit -m "ThingsthatIdid" (NO)
 git commit -m "Fixed UI Error and created helper function" (YES)
 ```
+
+`[Category] (#Number) Title`
+
+Example: `[Test](#15) Announcements`
+
+**Categories**:
+- [Feature]: Any feature we might add
+- [Bug]: Bug fixes
+- [Test]: Anything test related
+
+**Number**:
+Issue number referencing the pull request.
+
+**Title**:
+Brief Description for what pull request is about.
