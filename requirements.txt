@@ -2,6 +2,7 @@ pytest
 pytest-cov
 markdown
 pymongo
+mock
 sphinx
 sphinxcontrib-napoleon
 coverage
