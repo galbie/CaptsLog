@@ -1,23 +1,27 @@
-from .editor import Ui_MainWindow
+import sys
+
+from PySide import QtGui, QtCore
 import markdown
 
+from editor import UI_MainWindow
 
-class MainWindow(gui.QMainWindow):
 
-    def __init(self, parent=None):
-        self.markdown = Markdown()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.ui.txtInput.textChanged.conenct(self.textChange)
+class MainWindow(object):
+
+    def __init__(self, parent=None):
+        self.editor = UI_MainWindow()
+        self.ui = QtGui.QMainWindow()
+        self.editor.setupUi(self.ui)
+        self.editor.txtInput.textChanged.connect(self.textChange)
 
     def textChange(self):
         raw = self.ui.txtInput.toPlainText()
-        md = self.markdown.convert(raw)
+        md = markdown.convert(raw)
         self.ui.txtOutput.setHtml(md)
 
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    myMain = MainWindow()
-    myMain.show()
+    MW = MainWindow()
+    MW.ui.show()
     sys.exit(app.exec_())
