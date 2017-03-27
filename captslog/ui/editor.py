@@ -7,28 +7,32 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PySide import QtCore, QtGui 
+from PySide import QtCore, QtGui
 from PySide import QtWebKit
 
-class Ui_MainWindow(object):
+
+class UI_MainWindow(object):
+
     def setupUi(self, MainWindow):
+        """Setting up UI for Main Window
+        """
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(804, 600)
-		
+
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-		
+
         self.horizontalLayout = QtGui.QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setObjectName("horizontalLayout")
-		
+
         self.txtInput = QtGui.QPlainTextEdit(self.centralwidget)
         self.txtInput.setObjectName("MarkDtextEdit")
         self.horizontalLayout.addWidget(self.txtInput)
-		
+
         self.txtOutput = QtGui.QTextEdit(self.centralwidget)
         self.txtOutput.setObjectName("MarkDownView")
         self.horizontalLayout.addWidget(self.txtOutput)
-		
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 804, 21))
@@ -42,6 +46,5 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
-
-
+        MainWindow.setWindowTitle(QtGui.QApplication.translate(
+            "MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
