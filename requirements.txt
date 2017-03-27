@@ -1,8 +1,10 @@
 pytest
 pytest-cov
-pytest-pep8
-python-coveralls
 markdown
 pymongo
+mock
 sphinx
+sphinxcontrib-napoleon
 coverage
+flake8
+codecov

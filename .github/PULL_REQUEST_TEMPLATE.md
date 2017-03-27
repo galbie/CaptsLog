@@ -6,5 +6,7 @@ NOTE: Be descriptive in your commit name. I don't care about summary, but, in yo
 
 Example:
 
+```
 git commit -m "ThingsthatIdid" (NO)
 git commit -m "Fixed UI Error and created helper function" (YES)
+```

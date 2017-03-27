@@ -1,7 +1,12 @@
 # CaptsLog
-[![Coverage Status](https://coveralls.io/repos/github/jaehoonhwang/CaptsLog/badge.svg?branch=master)](https://coveralls.io/github/jaehoonhwang/CaptsLog?branch=master)
+[![codecov](https://codecov.io/gh/jaehoonhwang/CaptsLog/branch/master/graph/badge.svg)](https://codecov.io/gh/jaehoonhwang/CaptsLog) [![Build Status](https://travis-ci.org/jaehoonhwang/CaptsLog.svg?branch=master)](https://travis-ci.org/jaehoonhwang/CaptsLog)
 
-[![Build Status](https://travis-ci.org/jaehoonhwang/CaptsLog.svg?branch=master)](https://travis-ci.org/jaehoonhwang/CaptsLog)
+Journal Application using python
 
-Journal application using python
+## Specific package information:
 
+- **Python 2.7**
+- PyQt4
+- Pyside
+- Pymongo
+- Markdown
