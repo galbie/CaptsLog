@@ -77,12 +77,3 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.actionNew_Entry.setText(
             _translate("MainWindow", "New Entry", None))
-
-if __name__ == "__main__":
-	import sys
-	app = QtGui.QApplication(sys.argv)
-	Form = QtGui.QMainWindow()
-	ui = Ui_MainWindow()
-	ui.setupUi(Form)
-	Form.show()
-	sys.exit(app.exec_())
