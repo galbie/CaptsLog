@@ -15,6 +15,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
+#Collection of all widgets
 class CentralWidget(QtGui.QWidget):
 	def __init__(self, parent):
 		super(CentralWidget, self).__init__(parent)
@@ -93,6 +94,7 @@ class CentralWidget(QtGui.QWidget):
 		self.journalEntry.setMinimumSize(QtCore.QSize(200, 600))
 		self.journalEntry.setObjectName(_fromUtf8("journalEntry"))
 	
+	#Journal View
 	def __JournalView(self):
 		self.journalView = QtGui.QTextEdit(self.centralWidget)
 		self.journalView.setMinimumSize(QtCore.QSize(200, 600))

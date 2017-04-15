@@ -25,13 +25,14 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 
+# Main Window GUI
 class Ui_MainWindow(QtGui.QMainWindow):
 
     def setupUi(self, MainWindow):
 		"""Setting up Main window UI.
 		"""
 		self.setObjectName(_fromUtf8("MainWindow"))
-		self.resize(550, 682)
+		self.resize(550, 600)
 
         # Size Policy
 		sizePolicy = QtGui.QSizePolicy(

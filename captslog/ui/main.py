@@ -17,7 +17,9 @@ try:
 except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
-		
+
+
+# Main Control Class		
 class Main(QtGui.QMainWindow):
 	
 	def __init__(self, parent=None):
@@ -25,7 +27,6 @@ class Main(QtGui.QMainWindow):
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.ui.center_widget.journalEntry.textChanged.connect(self.text_changed)
-		self.wire_keys()
 	
 	def text_changed(self):
 		raw = self.ui.center_widget.journalEntry.toPlainText()
@@ -33,36 +34,6 @@ class Main(QtGui.QMainWindow):
 		raw = str(raw)
 		ntxt = md.convert(raw)
 		self.ui.center_widget.journalView.setHtml(ntxt)
-	
-	def keyPressEvent(self, ev):
-		if ev.modifiers() & QtCore.Qt.ControlModifier\
-			and ev.key() in self.ctrl_keys:
-			return self.ctrl_keys[ev.key()](ev)
-		if ev.modifiers() & QtCore.Qt.AltModifier and ev.key() in self.mod_keys:
-			return self.mod_keys[ev.key()](ev)
-		if ev.key() in self.keys:
-			return self.keys[ev.key()](ev)
-
-	def _help(self, ev):
-		print "showing help"
-
-	def _save(self, ev):
-		print "saving file"
-
-	def _open(self, ev):
-		print "opening file"
-
-	def wire_keys(self):
-		self.ctrl_keys = {
-			QtCore.Qt.Key_S: self._save,
-			QtCore.Qt.Key_O: self._open,
-		}
-		self.mod_keys = {
-
-		}
-		self.keys = {
-			QtCore.Qt.Key_F1: self._help,
-        }
 		
 
 if __name__ == "__main__":
