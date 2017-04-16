@@ -130,10 +130,8 @@ def test_search_entries_by_created_date():
     assert not db_handler.search_entries_by_created_date(date)
     assert db_handler.search_entries_by_created_date(date1)
     entry = db_handler.support_func_get_all(1)
-    # print entry
-    # print isinstance(entry, bool)
-    if not isinstance(entry, bool):
-        # print entry
+    print isinstance(entry, bool)
+    if entry is not None:
         result = db_handler.search_entries_by_created_date(
             entry[0]["Date_Created"])
         if isinstance(result, bool):
@@ -148,7 +146,7 @@ def test_search_entries_by_modified_date():
     date += datetime.timedelta(days=1)
     assert not db_handler.search_entries_by_modified_date(date)
     entry = db_handler.support_func_get_all(1)
-    if not isinstance(entry, bool):
+    if entry is not None:
         result = db_handler.search_entries_by_modified_date(
             entry[0]["Last_Modified"])
         if isinstance(result, bool):
@@ -167,10 +165,10 @@ def test_update_entries():
     assert not db_handler.update_entries(
         bson.objectid.ObjectId("111111111111111111111111"), entry1)
     entry = db_handler.support_func_get_all(1)
-    if not isinstance(entry, bool):
+    if entry is not None:
         entry = entry[0]
         entry["Title"] = str(entry["Title"]) + str("1")
-        assert db_handler.update_entries(entry[0]["_id"], entry)
+        assert db_handler.update_entries(entry["_id"], entry)
 
 
 def test_delete_entries():
@@ -178,6 +176,6 @@ def test_delete_entries():
     assert not db_handler.delete_entries(
         "111111111111111111111111")
     entry = db_handler.support_func_get_all(3)
-    if not isinstance(entry, bool):
+    if entry is not None:
         entry = entry[0]
-        assert db_handler.delete_entries(entry[0]["_id"])
+        assert db_handler.delete_entries(entry["_id"])
