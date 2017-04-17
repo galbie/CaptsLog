@@ -26,14 +26,14 @@ class Main(QtGui.QMainWindow):
 		super(Main, self).__init__(parent)
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
-		self.ui.center_widget.journalEntry.textChanged.connect(self.text_changed)
+		self.ui.center_widget.entry.journalEntry.textChanged.connect(self.text_triggered)
 	
-	def text_changed(self):
-		raw = self.ui.center_widget.journalEntry.toPlainText()
+	def text_triggered(self):
+		raw = self.ui.center_widget.entry.journalEntry.toPlainText()
 		md = markdown.Markdown()
 		raw = str(raw)
 		ntxt = md.convert(raw)
-		self.ui.center_widget.journalView.setHtml(ntxt)
+		self.ui.center_widget.view.journalView.setHtml(ntxt)
 		
 
 if __name__ == "__main__":

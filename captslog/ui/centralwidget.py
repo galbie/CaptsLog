@@ -1,4 +1,6 @@
 from PyQt4 import QtCore, QtGui
+from entrywidget import Entry_Widget
+from viewwidget import View_Widget
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -21,6 +23,7 @@ class CentralWidget(QtGui.QWidget):
 		super(CentralWidget, self).__init__(parent)
 		self.__CentralWidget()
 		self.__HorizLayout()
+		
 	
 	#Central Widget
 	def __CentralWidget(self):
@@ -34,7 +37,7 @@ class CentralWidget(QtGui.QWidget):
 		self.centralWidget.setSizePolicy(sizePolicy)
 		self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
 	
-	# Horizontal Layout 7, Journal Table, Entry, and View Layout
+	# Horizontal Layout 7, Journal Table, Entry, and View
 	def __HorizLayout(self):
 		self.horizontalLayout_7 = QtGui.QHBoxLayout(self.centralWidget)
 		self.horizontalLayout_7.setMargin(11)
@@ -49,23 +52,12 @@ class CentralWidget(QtGui.QWidget):
 		self.journalTableLayout.addWidget(self.journalList)
 		self.horizontalLayout_7.addLayout(self.journalTableLayout)
 		
-		self.journalEntryLayout = QtGui.QHBoxLayout()
-		self.journalEntryLayout.setMargin(11)
-		self.journalEntryLayout.setSpacing(6)
-		self.journalEntryLayout.setObjectName(_fromUtf8("journalEntryLayout"))
-		self.__JournalEntry()
-		self.journalEntryLayout.addWidget(self.journalEntry)
-		self.horizontalLayout_7.addLayout(self.journalEntryLayout)
+		self.entry = Entry_Widget(self)
 		
-		self.journalViewLayout = QtGui.QHBoxLayout()
-		self.journalViewLayout.setMargin(11)
-		self.journalViewLayout.setSpacing(6)
-		self.journalViewLayout.setObjectName(_fromUtf8("journalViewLayout"))
-		self.__JournalView()
-		self.journalViewLayout.addWidget(self.journalView)
-		self.horizontalLayout_7.addLayout(self.journalViewLayout)
-		
+		self.view = View_Widget(self)
+			
 		self.setLayout(self.horizontalLayout_7)
+		
 	
 	# Journal List
 	def __JournalList(self):
@@ -81,21 +73,9 @@ class CentralWidget(QtGui.QWidget):
 		self.journalList.setMaximumSize(QtCore.QSize(250, 16777215))
 		self.journalList.setObjectName(_fromUtf8("journalList"))
 	
-	# Journal Entry
-	def __JournalEntry(self):
-		self.journalEntry = QtGui.QPlainTextEdit(self.centralWidget)
-		sizePolicy = QtGui.QSizePolicy(
-			QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(
-			self.journalEntry.sizePolicy().hasHeightForWidth())   
-		self.journalEntry.setSizePolicy(sizePolicy)
-		self.journalEntry.setMinimumSize(QtCore.QSize(200, 600))
-		self.journalEntry.setObjectName(_fromUtf8("journalEntry"))
-	
 	#Journal View
 	def __JournalView(self):
 		self.journalView = QtGui.QTextEdit(self.centralWidget)
 		self.journalView.setMinimumSize(QtCore.QSize(200, 600))
 		self.journalView.setObjectName(_fromUtf8("journalView"))
+		self.journalView.setReadOnly(True)
