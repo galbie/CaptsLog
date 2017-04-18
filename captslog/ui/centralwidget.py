@@ -72,10 +72,3 @@ class CentralWidget(QtGui.QWidget):
 		self.journalList.setMinimumSize(QtCore.QSize(100, 600))
 		self.journalList.setMaximumSize(QtCore.QSize(250, 16777215))
 		self.journalList.setObjectName(_fromUtf8("journalList"))
-	
-	#Journal View
-	def __JournalView(self):
-		self.journalView = QtGui.QTextEdit(self.centralWidget)
-		self.journalView.setMinimumSize(QtCore.QSize(200, 600))
-		self.journalView.setObjectName(_fromUtf8("journalView"))
-		self.journalView.setReadOnly(True)

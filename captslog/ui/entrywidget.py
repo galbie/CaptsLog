@@ -22,6 +22,7 @@ class Entry_Widget(QtGui.QWidget):
 		super(Entry_Widget, self).__init__(parent)
 		self.entry_layout(parent)
 	
+	#Entry Layout
 	def entry_layout(self, parent):
 		self.journalEntryLayout = QtGui.QHBoxLayout()
 		self.journalEntryLayout.setMargin(11)
@@ -31,6 +32,7 @@ class Entry_Widget(QtGui.QWidget):
 		self.journalEntryLayout.addWidget(self.journalEntry)
 		parent.horizontalLayout_7.addLayout(self.journalEntryLayout)
 	
+	#Entry Widget
 	def __JournalEntry(self, parent):
 		self.journalEntry = QtGui.QPlainTextEdit(parent.centralWidget)
 		sizePolicy = QtGui.QSizePolicy(
