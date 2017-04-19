@@ -1,9 +1,8 @@
 import pprint
 from datetime import datetime
-import pymongo
 from pymongo import MongoClient
+from pymongo import errors
 from bson import ObjectId
-import time
 
 
 class DBHandlerClass:
@@ -22,7 +21,7 @@ class DBHandlerClass:
             user_password (str): Password for future logins.
 
         Returns:
-            bool: True for success or False for failure
+            result(bool): True for success or False for failure
         """
 
         if name == str(""):
@@ -48,7 +47,7 @@ class DBHandlerClass:
                 return True
             else:
                 return False
-        except pymongo.errors.ServerSelectionTimeoutError:
+        except errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   ' the target machine actively refused it')
             return True
@@ -58,11 +57,11 @@ class DBHandlerClass:
 
         Args:
             title (str): Title of the Journel Entry
-            tags (list): Tangs for the Entry
-            content(str): Content of the Entry
+            tags (list): Tags for the Entry
+            content(str): Content of the Entry(Markdown text)
 
         return:
-            int: 1 for success or 0 for failure
+            result(bool): True for success or False for failure
 
         """
         if title == str(""):
@@ -73,15 +72,13 @@ class DBHandlerClass:
                  "Last_Modified": datetime.now(),
                  "Tags": tags,
                  "Content": content}
-        # TODO reformat the 'content'
-        # variable to include the Markup file (data = Binary(open(content).read()))
         t = self.db["Entries_Table"]
         try:
             if t.insert_one(entry):
                 return True
             else:
                 return False
-        except pymongo.errors.ServerSelectionTimeoutError:
+        except errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   ' the target machine actively refused it')
             return True
@@ -90,10 +87,10 @@ class DBHandlerClass:
         """Search For a Specified Title in the Entries_Table
 
         Args:
-            title: the title you are searching for
+            title(str): the title you are searching for
 
         Return:
-            collection: the search result
+            result(collection): the search result
 
         """
 
@@ -101,7 +98,7 @@ class DBHandlerClass:
         try:
             result = entries_table.find_one({"Title": title})
             return result
-        except pymongo.errors.ServerSelectionTimeoutError:
+        except errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   ' the target machine actively refused it')
             return False
@@ -112,20 +109,19 @@ class DBHandlerClass:
         """Search For Entries created on the specified Date in the Entries_Table
 
         Args:
-            date: the date you are searching for
+            date(datetime): the date you are searching for
 
         Return:
-            collection: the search result
+            result(collection): the search result
 
         """
 
         if date.date() <= datetime.now().date():
             entries_table = self.db["Entries_Table"]
             try:
-                return entries_table.find_one(
+                return entries_table.find(
                     {"Date_Created": date})
-                # TODO Modify to allow multiple results using find()
-            except pymongo.errors.ServerSelectionTimeoutError:
+            except errors.ServerSelectionTimeoutError:
                 print('ERROR : No connection could be made because'
                       ' the target machine actively refused it')
                 return True
@@ -134,19 +130,19 @@ class DBHandlerClass:
     def search_entries_by_modified_date(self, date):
         """Search For Entries modified on the specified Date in the Entries_Table
 
-         Args:
-            date: the date you are searching for
+        Args:
+            date(datetime): the date you are searching for
 
         Return:
-            collection: the search result
+            result(collection): the search result
 
         """
         if date.date() <= datetime.now().date():
             entries_table = self.db["Entries_Table"]
             try:
-                return entries_table.find_one(
-                    {"Last_Modified": date})  # TODO Modify to allow multiple results using find()
-            except pymongo.errors.ServerSelectionTimeoutError:
+                return entries_table.find(
+                    {"Last_Modified": date})
+            except errors.ServerSelectionTimeoutError:
                 print('ERROR : No connection could be made because'
                       ' the target machine actively refused it')
                 return True
@@ -156,23 +152,22 @@ class DBHandlerClass:
         """Update entries in the Entries_Table
 
         Args:
-            _id:  ObjectID of the entry you want to change
-            vals: New values
+            _id(ObjectId):  ObjectID of the entry you want to change
+            vals(collection): New values
 
         Return:
-             int:1 if the update was successful. 0 if it fails
+            result(bool):True if the update was successful. False if it fails
         """
 
         entries_table = self.db["Entries_Table"]
         try:
-            if not entries_table.find_one({"_id": ObjectId(_id)}):
-                # print "The specified entry does not Exist"
-                return False
             vals["Last_Modified"] = datetime.now()
+            if not entries_table.find_one({"_id": ObjectId(_id)}):
+                return False
             entries_table.update_one({"_id": ObjectId(_id)},
                                      {"$set": vals})
             return True
-        except pymongo.errors.ServerSelectionTimeoutError:
+        except errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   ' the target machine actively refused it')
             return False
@@ -181,10 +176,10 @@ class DBHandlerClass:
         """Delete entries in the Entries_Table
 
         Args:
-            _id:  Object ID of the entry you want to change
+            _id(str):  Object ID of the entry you want to change
 
         Return:
-            bool:1 if the delete was successful. 0 if it fails
+            result(bool):true if the delete was successful. false if it fails
         """
 
         entries_table = self.db["Entries_Table"]
@@ -194,27 +189,27 @@ class DBHandlerClass:
                 return False
             entries_table.delete_one({"_id": ObjectId(_id)})
             return True
-        except pymongo.errors.ServerSelectionTimeoutError:
+        except errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   ' the target machine actively refused it')
             return False
 
     def support_func_get_all(self, lim):
-        """This is just a support function which returns all the data in the Entries table upto a specified limit
+        """
 
         Args:
-            lim: Max number of elements to be retrieved
-        Return:
-            collection: All the entries in the Entries_table uto the specified limit
+            lim(int): number of items you need to get from the database
+
+        Returns:
+            result(collection): all elements in the
         """
 
         try:
             entries_table = self.db["Entries_Table"]
             result = entries_table.find().limit(lim)
-            print(result[0])
+            print result[0]
             return result
-        except pymongo.errors.ServerSelectionTimeoutError:
+        except errors.ServerSelectionTimeoutError:
             print('ERROR : No connection could be made because'
                   'the target machine actively refused it')
-            return False
-            # TODO Save the Entire text in the MArkdown file instead of the markdown file itself
+            return None
