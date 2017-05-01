@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>captslog.db.DBHandler &mdash; CaptsLog  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="CaptsLog  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CaptsLog
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">captslog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CaptsLog</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>captslog.db.DBHandler</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for captslog.db.DBHandler</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">pymongo</span> <span class="k">import</span> <span class="n">MongoClient</span>
+<span class="kn">from</span> <span class="nn">pymongo</span> <span class="k">import</span> <span class="n">errors</span>
+<span class="kn">from</span> <span class="nn">bson</span> <span class="k">import</span> <span class="n">ObjectId</span>
+
+
+<div class="viewcode-block" id="DBHandlerClass"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass">[docs]</a><span class="k">class</span> <span class="nc">DBHandlerClass</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">()</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="s1">&#39;Captains_Log_DB&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="s1">&#39;Captains_Log_DB&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="DBHandlerClass.insert_to_user_table"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.insert_to_user_table">[docs]</a>    <span class="k">def</span> <span class="nf">insert_to_user_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">user_password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert Data into the User_Table in the Database</span>
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the User</span>
+<span class="sd">            username (str): Username for future logins. should be at least 4 characters</span>
+<span class="sd">            user_password (str): Password for future logins.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            result(bool): True for success or False for failure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="c1"># print &quot;Error!! name Can&#39;t be Empty&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="c1"># print &quot;Error!! username Can&#39;t be Empty&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">username</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># print &quot;Error!! username should be at least 4 characters&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_password</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="c1"># print &quot;Error!! password should be at least 5 characters&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                 <span class="s2">&quot;Username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+                 <span class="s2">&quot;User_Password&quot;</span><span class="p">:</span> <span class="n">user_password</span><span class="p">,</span>
+                 <span class="s2">&quot;First_Login_Date&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+                 <span class="s2">&quot;Last_Login_Date&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()}</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;User_Table&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">insert_one</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                  <span class="s1">&#39; the target machine actively refused it&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="DBHandlerClass.insert_to_entries_table"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.insert_to_entries_table">[docs]</a>    <span class="k">def</span> <span class="nf">insert_to_entries_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">markdown_text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert Data into the Entries_Table in the Database</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            title (str): Title of the Journel Entry</span>
+<span class="sd">            tags (list): Tags for the Entry</span>
+<span class="sd">            markdown_text(str): Content of the Entry(Markdown text)</span>
+
+<span class="sd">        return:</span>
+<span class="sd">            result(bool): True for success or False for failure</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="c1"># print &quot;Error!! Title Can&#39;t be Empty&quot;</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Title&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+                 <span class="s2">&quot;Date_Created&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+                 <span class="s2">&quot;Last_Modified&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+                 <span class="s2">&quot;Tags&quot;</span><span class="p">:</span> <span class="n">tags</span><span class="p">,</span>
+                 <span class="s2">&quot;MarkdownFile&quot;</span><span class="p">:</span> <span class="n">markdown_text</span><span class="p">}</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Entries_Table&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">insert_one</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                  <span class="s1">&#39; the target machine actively refused it&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="DBHandlerClass.search_entries_by_title"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.search_entries_by_title">[docs]</a>    <span class="k">def</span> <span class="nf">search_entries_by_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Search For a Specified Title in the Entries_Table</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            title(str): the title you are searching for</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            result(collection): the search result</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">entries_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Entries_Table&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">entries_table</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s2">&quot;Title&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                  <span class="s1">&#39; the target machine actively refused it&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+            <span class="c1"># TODO Modify to allow multiple results using find(),</span>
+            <span class="c1"># TODO also find similar results which are not exact matches</span>
+
+<div class="viewcode-block" id="DBHandlerClass.search_entries_by_created_date"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.search_entries_by_created_date">[docs]</a>    <span class="k">def</span> <span class="nf">search_entries_by_created_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Search For Entries created on the specified Date in the Entries_Table</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            date(datetime): the date you are searching for</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            result(collection): the search result</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">date</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">():</span>
+            <span class="n">entries_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Entries_Table&quot;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">entries_table</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;Date_Created&quot;</span><span class="p">:</span> <span class="n">date</span><span class="p">})</span>
+            <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                      <span class="s1">&#39; the target machine actively refused it&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DBHandlerClass.search_entries_by_modified_date"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.search_entries_by_modified_date">[docs]</a>    <span class="k">def</span> <span class="nf">search_entries_by_modified_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Search For Entries modified on the specified Date in the Entries_Table</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            date(datetime): the date you are searching for</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            result(collection): the search result</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">date</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">():</span>
+            <span class="n">entries_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Entries_Table&quot;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">entries_table</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;Last_Modified&quot;</span><span class="p">:</span> <span class="n">date</span><span class="p">})</span>
+            <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                      <span class="s1">&#39; the target machine actively refused it&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DBHandlerClass.update_entries"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.update_entries">[docs]</a>    <span class="k">def</span> <span class="nf">update_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update entries in the Entries_Table</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _id(ObjectId):  ObjectID of the entry you want to change</span>
+<span class="sd">            vals(collection): New values</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            result(bool):True if the update was successful. False if it fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">entries_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Entries_Table&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vals</span><span class="p">[</span><span class="s2">&quot;Last_Modified&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">entries_table</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="n">_id</span><span class="p">)}):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">entries_table</span><span class="o">.</span><span class="n">update_one</span><span class="p">({</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="n">_id</span><span class="p">)},</span>
+                                     <span class="p">{</span><span class="s2">&quot;$set&quot;</span><span class="p">:</span> <span class="n">vals</span><span class="p">})</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                  <span class="s1">&#39; the target machine actively refused it&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DBHandlerClass.delete_entries"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.delete_entries">[docs]</a>    <span class="k">def</span> <span class="nf">delete_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete entries in the Entries_Table</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _id(str):  Object ID of the entry you want to change</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            result(bool):true if the delete was successful. false if it fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">entries_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Entries_Table&quot;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">entries_table</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="n">_id</span><span class="p">)}):</span>
+                <span class="c1"># print &quot;The specified entry does not Exist&quot;</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">entries_table</span><span class="o">.</span><span class="n">delete_one</span><span class="p">({</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="n">_id</span><span class="p">)})</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                  <span class="s1">&#39; the target machine actively refused it&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DBHandlerClass.support_func_get_all"><a class="viewcode-back" href="../../../captslog.db.html#captslog.db.DBHandler.DBHandlerClass.support_func_get_all">[docs]</a>    <span class="k">def</span> <span class="nf">support_func_get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lim</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lim(int): number of items you need to get from the database</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            result(collection): all elements in the</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">entries_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Entries_Table&quot;</span><span class="p">]</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">entries_table</span><span class="o">.</span><span class="n">find</span><span class="p">()</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">lim</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">ServerSelectionTimeoutError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : No connection could be made because&#39;</span>
+                  <span class="s1">&#39;the target machine actively refused it&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div></div>
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Jaehoon H., Chet L., Conor S., Katshuri K..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

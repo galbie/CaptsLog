@@ -1,0 +1,1536 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pymongo.mongo_client &mdash; CaptsLog  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="CaptsLog  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> CaptsLog
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">captslog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">CaptsLog</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>pymongo.mongo_client</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pymongo.mongo_client</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2009-2015 MongoDB, Inc.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you</span>
+<span class="c1"># may not use this file except in compliance with the License.  You</span>
+<span class="c1"># may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1"># http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or</span>
+<span class="c1"># implied.  See the License for the specific language governing</span>
+<span class="c1"># permissions and limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Tools for connecting to MongoDB.</span>
+
+<span class="sd">.. seealso:: :doc:`/examples/high_availability` for examples of connecting</span>
+<span class="sd">   to replica sets or sets of mongos servers.</span>
+
+<span class="sd">To get a :class:`~pymongo.database.Database` instance from a</span>
+<span class="sd">:class:`MongoClient` use either dictionary-style or attribute-style</span>
+<span class="sd">access:</span>
+
+<span class="sd">.. doctest::</span>
+
+<span class="sd">  &gt;&gt;&gt; from pymongo import MongoClient</span>
+<span class="sd">  &gt;&gt;&gt; c = MongoClient()</span>
+<span class="sd">  &gt;&gt;&gt; c.test_database</span>
+<span class="sd">  Database(MongoClient(host=[&#39;localhost:27017&#39;], document_class=dict, tz_aware=False, connect=True), u&#39;test_database&#39;)</span>
+<span class="sd">  &gt;&gt;&gt; c[&#39;test-database&#39;]</span>
+<span class="sd">  Database(MongoClient(host=[&#39;localhost:27017&#39;], document_class=dict, tz_aware=False, connect=True), u&#39;test-database&#39;)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">bson.codec_options</span> <span class="k">import</span> <span class="n">DEFAULT_CODEC_OPTIONS</span>
+<span class="kn">from</span> <span class="nn">bson.py3compat</span> <span class="k">import</span> <span class="p">(</span><span class="n">integer_types</span><span class="p">,</span>
+                            <span class="n">string_type</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">bson.son</span> <span class="k">import</span> <span class="n">SON</span>
+<span class="kn">from</span> <span class="nn">pymongo</span> <span class="k">import</span> <span class="p">(</span><span class="n">common</span><span class="p">,</span>
+                     <span class="n">database</span><span class="p">,</span>
+                     <span class="n">helpers</span><span class="p">,</span>
+                     <span class="n">message</span><span class="p">,</span>
+                     <span class="n">periodic_executor</span><span class="p">,</span>
+                     <span class="n">uri_parser</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pymongo.client_options</span> <span class="k">import</span> <span class="n">ClientOptions</span>
+<span class="kn">from</span> <span class="nn">pymongo.cursor_manager</span> <span class="k">import</span> <span class="n">CursorManager</span>
+<span class="kn">from</span> <span class="nn">pymongo.errors</span> <span class="k">import</span> <span class="p">(</span><span class="n">AutoReconnect</span><span class="p">,</span>
+                            <span class="n">ConfigurationError</span><span class="p">,</span>
+                            <span class="n">ConnectionFailure</span><span class="p">,</span>
+                            <span class="n">InvalidOperation</span><span class="p">,</span>
+                            <span class="n">InvalidURI</span><span class="p">,</span>
+                            <span class="n">NetworkTimeout</span><span class="p">,</span>
+                            <span class="n">NotMasterError</span><span class="p">,</span>
+                            <span class="n">OperationFailure</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pymongo.read_preferences</span> <span class="k">import</span> <span class="n">ReadPreference</span>
+<span class="kn">from</span> <span class="nn">pymongo.server_selectors</span> <span class="k">import</span> <span class="p">(</span><span class="n">writable_preferred_server_selector</span><span class="p">,</span>
+                                      <span class="n">writable_server_selector</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pymongo.server_type</span> <span class="k">import</span> <span class="n">SERVER_TYPE</span>
+<span class="kn">from</span> <span class="nn">pymongo.topology</span> <span class="k">import</span> <span class="n">Topology</span>
+<span class="kn">from</span> <span class="nn">pymongo.topology_description</span> <span class="k">import</span> <span class="n">TOPOLOGY_TYPE</span>
+<span class="kn">from</span> <span class="nn">pymongo.settings</span> <span class="k">import</span> <span class="n">TopologySettings</span>
+<span class="kn">from</span> <span class="nn">pymongo.write_concern</span> <span class="k">import</span> <span class="n">WriteConcern</span>
+
+
+<span class="k">class</span> <span class="nc">MongoClient</span><span class="p">(</span><span class="n">common</span><span class="o">.</span><span class="n">BaseObject</span><span class="p">):</span>
+    <span class="n">HOST</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
+    <span class="n">PORT</span> <span class="o">=</span> <span class="mi">27017</span>
+    <span class="c1"># Define order to retrieve options from ClientOptions for __repr__.</span>
+    <span class="c1"># No host/port; these are retrieved from TopologySettings.</span>
+    <span class="n">_constructor_args</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;document_class&#39;</span><span class="p">,</span> <span class="s1">&#39;tz_aware&#39;</span><span class="p">,</span> <span class="s1">&#39;connect&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">document_class</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
+            <span class="n">tz_aware</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">connect</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Client for a MongoDB instance, a replica set, or a set of mongoses.</span>
+
+<span class="sd">        The client object is thread-safe and has connection-pooling built in.</span>
+<span class="sd">        If an operation fails because of a network error,</span>
+<span class="sd">        :class:`~pymongo.errors.ConnectionFailure` is raised and the client</span>
+<span class="sd">        reconnects in the background. Application code should handle this</span>
+<span class="sd">        exception (recognizing that the operation failed) and then continue to</span>
+<span class="sd">        execute.</span>
+
+<span class="sd">        The `host` parameter can be a full `mongodb URI</span>
+<span class="sd">        &lt;http://dochub.mongodb.org/core/connections&gt;`_, in addition to</span>
+<span class="sd">        a simple hostname. It can also be a list of hostnames or</span>
+<span class="sd">        URIs. Any port specified in the host string(s) will override</span>
+<span class="sd">        the `port` parameter. If multiple mongodb URIs containing</span>
+<span class="sd">        database or auth information are passed, the last database,</span>
+<span class="sd">        username, and password present will be used.  For username and</span>
+<span class="sd">        passwords reserved characters like &#39;:&#39;, &#39;/&#39;, &#39;+&#39; and &#39;@&#39; must be</span>
+<span class="sd">        percent encoded following RFC 2396::</span>
+
+<span class="sd">            try:</span>
+<span class="sd">                # Python 3.x</span>
+<span class="sd">                from urllib.parse import quote_plus</span>
+<span class="sd">            except ImportError:</span>
+<span class="sd">                # Python 2.x</span>
+<span class="sd">                from urllib import quote_plus</span>
+
+<span class="sd">            uri = &quot;mongodb://%s:%s@%s&quot; % (</span>
+<span class="sd">                quote_plus(user), quote_plus(password), host)</span>
+<span class="sd">            client = MongoClient(uri)</span>
+
+<span class="sd">        Unix domain sockets are also supported. The socket path must be percent</span>
+<span class="sd">        encoded in the URI::</span>
+
+<span class="sd">            uri = &quot;mongodb://%s:%s@%s&quot; % (</span>
+<span class="sd">                quote_plus(user), quote_plus(password), quote_plus(socket_path))</span>
+<span class="sd">            client = MongoClient(uri)</span>
+
+<span class="sd">        But not when passed as a simple hostname::</span>
+
+<span class="sd">            client = MongoClient(&#39;/tmp/mongodb-27017.sock&#39;)</span>
+
+<span class="sd">        .. note:: Starting with version 3.0 the :class:`MongoClient`</span>
+<span class="sd">          constructor no longer blocks while connecting to the server or</span>
+<span class="sd">          servers, and it no longer raises</span>
+<span class="sd">          :class:`~pymongo.errors.ConnectionFailure` if they are</span>
+<span class="sd">          unavailable, nor :class:`~pymongo.errors.ConfigurationError`</span>
+<span class="sd">          if the user&#39;s credentials are wrong. Instead, the constructor</span>
+<span class="sd">          returns immediately and launches the connection process on</span>
+<span class="sd">          background threads. You can check if the server is available</span>
+<span class="sd">          like this::</span>
+
+<span class="sd">            from pymongo.errors import ConnectionFailure</span>
+<span class="sd">            client = MongoClient()</span>
+<span class="sd">            try:</span>
+<span class="sd">                # The ismaster command is cheap and does not require auth.</span>
+<span class="sd">                client.admin.command(&#39;ismaster&#39;)</span>
+<span class="sd">            except ConnectionFailure:</span>
+<span class="sd">                print(&quot;Server not available&quot;)</span>
+
+<span class="sd">        .. warning:: When using PyMongo in a multiprocessing context, please</span>
+<span class="sd">          read :ref:`multiprocessing` first.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `host` (optional): hostname or IP address or Unix domain socket</span>
+<span class="sd">            path of a single mongod or mongos instance to connect to, or a</span>
+<span class="sd">            mongodb URI, or a list of hostnames / mongodb URIs. If `host` is</span>
+<span class="sd">            an IPv6 literal it must be enclosed in &#39;[&#39; and &#39;]&#39; characters</span>
+<span class="sd">            following the RFC2732 URL syntax (e.g. &#39;[::1]&#39; for localhost).</span>
+<span class="sd">            Multihomed and round robin DNS addresses are **not** supported.</span>
+<span class="sd">          - `port` (optional): port number on which to connect</span>
+<span class="sd">          - `document_class` (optional): default class to use for</span>
+<span class="sd">            documents returned from queries on this client</span>
+<span class="sd">          - `tz_aware` (optional): if ``True``,</span>
+<span class="sd">            :class:`~datetime.datetime` instances returned as values</span>
+<span class="sd">            in a document by this :class:`MongoClient` will be timezone</span>
+<span class="sd">            aware (otherwise they will be naive)</span>
+<span class="sd">          - `connect` (optional): if ``True`` (the default), immediately</span>
+<span class="sd">            begin connecting to MongoDB in the background. Otherwise connect</span>
+<span class="sd">            on the first operation.</span>
+
+<span class="sd">          | **Other optional parameters can be passed as keyword arguments:**</span>
+
+<span class="sd">          - `maxPoolSize` (optional): The maximum allowable number of</span>
+<span class="sd">            concurrent connections to each connected server. Requests to a</span>
+<span class="sd">            server will block if there are `maxPoolSize` outstanding</span>
+<span class="sd">            connections to the requested server. Defaults to 100. Cannot be 0.</span>
+<span class="sd">          - `minPoolSize` (optional): The minimum required number of concurrent</span>
+<span class="sd">            connections that the pool will maintain to each connected server.</span>
+<span class="sd">            Default is 0.</span>
+<span class="sd">          - `maxIdleTimeMS` (optional): The maximum number of milliseconds that</span>
+<span class="sd">            a connection can remain idle in the pool before being removed and</span>
+<span class="sd">            replaced. Defaults to `None` (no limit).</span>
+<span class="sd">          - `socketTimeoutMS`: (integer or None) Controls how long (in</span>
+<span class="sd">            milliseconds) the driver will wait for a response after sending an</span>
+<span class="sd">            ordinary (non-monitoring) database operation before concluding that</span>
+<span class="sd">            a network error has occurred. Defaults to ``None`` (no timeout).</span>
+<span class="sd">          - `connectTimeoutMS`: (integer or None) Controls how long (in</span>
+<span class="sd">            milliseconds) the driver will wait during server monitoring when</span>
+<span class="sd">            connecting a new socket to a server before concluding the server</span>
+<span class="sd">            is unavailable. Defaults to ``20000`` (20 seconds).</span>
+<span class="sd">          - `serverSelectionTimeoutMS`: (integer) Controls how long (in</span>
+<span class="sd">            milliseconds) the driver will wait to find an available,</span>
+<span class="sd">            appropriate server to carry out a database operation; while it is</span>
+<span class="sd">            waiting, multiple server monitoring operations may be carried out,</span>
+<span class="sd">            each controlled by `connectTimeoutMS`. Defaults to ``30000`` (30</span>
+<span class="sd">            seconds).</span>
+<span class="sd">          - `waitQueueTimeoutMS`: (integer or None) How long (in milliseconds)</span>
+<span class="sd">            a thread will wait for a socket from the pool if the pool has no</span>
+<span class="sd">            free sockets. Defaults to ``None`` (no timeout).</span>
+<span class="sd">          - `waitQueueMultiple`: (integer or None) Multiplied by maxPoolSize</span>
+<span class="sd">            to give the number of threads allowed to wait for a socket at one</span>
+<span class="sd">            time. Defaults to ``None`` (no limit).</span>
+<span class="sd">          - `socketKeepAlive`: (boolean) Whether to send periodic keep-alive</span>
+<span class="sd">            packets on connected sockets. Defaults to ``False`` (do not send</span>
+<span class="sd">            keep-alive packets).</span>
+<span class="sd">          - `heartbeatFrequencyMS`: (optional) The number of milliseconds</span>
+<span class="sd">            between periodic server checks, or None to accept the default</span>
+<span class="sd">            frequency of 10 seconds.</span>
+<span class="sd">          - `appname`: (string or None) The name of the application that</span>
+<span class="sd">            created this MongoClient instance. MongoDB 3.4 and newer will</span>
+<span class="sd">            print this value in the server log upon establishing each</span>
+<span class="sd">            connection. It is also recorded in the slow query log and</span>
+<span class="sd">            profile collections.</span>
+<span class="sd">          - `event_listeners`: a list or tuple of event listeners. See</span>
+<span class="sd">            :mod:`~pymongo.monitoring` for details.</span>
+
+<span class="sd">          | **Write Concern options:**</span>
+<span class="sd">          | (Only set if passed. No default values.)</span>
+
+<span class="sd">          - `w`: (integer or string) If this is a replica set, write operations</span>
+<span class="sd">            will block until they have been replicated to the specified number</span>
+<span class="sd">            or tagged set of servers. `w=&lt;int&gt;` always includes the replica set</span>
+<span class="sd">            primary (e.g. w=3 means write to the primary and wait until</span>
+<span class="sd">            replicated to **two** secondaries). Passing w=0 **disables write</span>
+<span class="sd">            acknowledgement** and all other write concern options.</span>
+<span class="sd">          - `wtimeout`: (integer) Used in conjunction with `w`. Specify a value</span>
+<span class="sd">            in milliseconds to control how long to wait for write propagation</span>
+<span class="sd">            to complete. If replication does not complete in the given</span>
+<span class="sd">            timeframe, a timeout exception is raised.</span>
+<span class="sd">          - `j`: If ``True`` block until write operations have been committed</span>
+<span class="sd">            to the journal. Cannot be used in combination with `fsync`. Prior</span>
+<span class="sd">            to MongoDB 2.6 this option was ignored if the server was running</span>
+<span class="sd">            without journaling. Starting with MongoDB 2.6 write operations will</span>
+<span class="sd">            fail with an exception if this option is used when the server is</span>
+<span class="sd">            running without journaling.</span>
+<span class="sd">          - `fsync`: If ``True`` and the server is running without journaling,</span>
+<span class="sd">            blocks until the server has synced all data files to disk. If the</span>
+<span class="sd">            server is running with journaling, this acts the same as the `j`</span>
+<span class="sd">            option, blocking until write operations have been committed to the</span>
+<span class="sd">            journal. Cannot be used in combination with `j`.</span>
+
+<span class="sd">          | **Replica set keyword arguments for connecting with a replica set</span>
+<span class="sd">            - either directly or via a mongos:**</span>
+
+<span class="sd">          - `replicaSet`: (string or None) The name of the replica set to</span>
+<span class="sd">            connect to. The driver will verify that all servers it connects to</span>
+<span class="sd">            match this name. Implies that the hosts specified are a seed list</span>
+<span class="sd">            and the driver should attempt to find all members of the set.</span>
+<span class="sd">            Defaults to ``None``.</span>
+
+<span class="sd">          | **Read Preference:**</span>
+
+<span class="sd">          - `readPreference`: The replica set read preference for this client.</span>
+<span class="sd">            One of ``primary``, ``primaryPreferred``, ``secondary``,</span>
+<span class="sd">            ``secondaryPreferred``, or ``nearest``. Defaults to ``primary``.</span>
+<span class="sd">          - `readPreferenceTags`: Specifies a tag set as a comma-separated list</span>
+<span class="sd">            of colon-separated key-value pairs. For example ``dc:ny,rack:1``.</span>
+<span class="sd">            Defaults to ``None``.</span>
+<span class="sd">          - `maxStalenessSeconds`: (integer) The maximum estimated</span>
+<span class="sd">            length of time a replica set secondary can fall behind the primary</span>
+<span class="sd">            in replication before it will no longer be selected for operations.</span>
+<span class="sd">            Defaults to ``-1``, meaning no maximum. If maxStalenessSeconds</span>
+<span class="sd">            is set, it must be a positive integer greater than or equal to</span>
+<span class="sd">            90 seconds.</span>
+
+<span class="sd">          | **SSL configuration:**</span>
+
+<span class="sd">          - `ssl`: If ``True``, create the connection to the server using SSL.</span>
+<span class="sd">            Defaults to ``False``.</span>
+<span class="sd">          - `ssl_certfile`: The certificate file used to identify the local</span>
+<span class="sd">            connection against mongod. Implies ``ssl=True``. Defaults to</span>
+<span class="sd">            ``None``.</span>
+<span class="sd">          - `ssl_keyfile`: The private keyfile used to identify the local</span>
+<span class="sd">            connection against mongod.  If included with the ``certfile`` then</span>
+<span class="sd">            only the ``ssl_certfile`` is needed.  Implies ``ssl=True``.</span>
+<span class="sd">            Defaults to ``None``.</span>
+<span class="sd">          - `ssl_pem_passphrase`: The password or passphrase for decrypting</span>
+<span class="sd">            the private key in ``ssl_certfile`` or ``ssl_keyfile``. Only</span>
+<span class="sd">            necessary if the private key is encrypted. Only supported by python</span>
+<span class="sd">            2.7.9+ (pypy 2.5.1+) and 3.3+. Defaults to ``None``.</span>
+<span class="sd">          - `ssl_cert_reqs`: Specifies whether a certificate is required from</span>
+<span class="sd">            the other side of the connection, and whether it will be validated</span>
+<span class="sd">            if provided. It must be one of the three values ``ssl.CERT_NONE``</span>
+<span class="sd">            (certificates ignored), ``ssl.CERT_REQUIRED`` (certificates</span>
+<span class="sd">            required and validated), or ``ssl.CERT_OPTIONAL`` (the same as</span>
+<span class="sd">            CERT_REQUIRED, unless the server was configured to use anonymous</span>
+<span class="sd">            ciphers). If the value of this parameter is not ``ssl.CERT_NONE``</span>
+<span class="sd">            and a value is not provided for ``ssl_ca_certs`` PyMongo will</span>
+<span class="sd">            attempt to load system provided CA certificates. If the python</span>
+<span class="sd">            version in use does not support loading system CA certificates</span>
+<span class="sd">            then the ``ssl_ca_certs`` parameter must point to a file of CA</span>
+<span class="sd">            certificates. Implies ``ssl=True``. Defaults to</span>
+<span class="sd">            ``ssl.CERT_REQUIRED`` if not provided and ``ssl=True``.</span>
+<span class="sd">          - `ssl_ca_certs`: The ca_certs file contains a set of concatenated</span>
+<span class="sd">            &quot;certification authority&quot; certificates, which are used to validate</span>
+<span class="sd">            certificates passed from the other end of the connection.</span>
+<span class="sd">            Implies ``ssl=True``. Defaults to ``None``.</span>
+<span class="sd">          - `ssl_crlfile`: The path to a PEM or DER formatted certificate</span>
+<span class="sd">            revocation list. Only supported by python 2.7.9+ (pypy 2.5.1+)</span>
+<span class="sd">            and 3.4+. Defaults to ``None``.</span>
+<span class="sd">          - `ssl_match_hostname`: If ``True`` (the default), and</span>
+<span class="sd">            `ssl_cert_reqs` is not ``ssl.CERT_NONE``, enables hostname</span>
+<span class="sd">            verification using the :func:`~ssl.match_hostname` function from</span>
+<span class="sd">            python&#39;s :mod:`~ssl` module. Think very carefully before setting</span>
+<span class="sd">            this to ``False`` as that could make your application vulnerable to</span>
+<span class="sd">            man-in-the-middle attacks.</span>
+
+<span class="sd">          | **Read Concern options:**</span>
+<span class="sd">          | (If not set explicitly, this will use the server default)</span>
+
+<span class="sd">          - `readConcernLevel`: (string) The read concern level specifies the</span>
+<span class="sd">            level of isolation for read operations.  For example, a read</span>
+<span class="sd">            operation using a read concern level of ``majority`` will only</span>
+<span class="sd">            return data that has been written to a majority of nodes. If the</span>
+<span class="sd">            level is left unspecified, the server default will be used.</span>
+
+<span class="sd">        .. mongodoc:: connections</span>
+
+<span class="sd">        .. versionchanged:: 3.0</span>
+<span class="sd">           :class:`~pymongo.mongo_client.MongoClient` is now the one and only</span>
+<span class="sd">           client class for a standalone server, mongos, or replica set.</span>
+<span class="sd">           It includes the functionality that had been split into</span>
+<span class="sd">           :class:`~pymongo.mongo_client.MongoReplicaSetClient`: it can connect</span>
+<span class="sd">           to a replica set, discover all its members, and monitor the set for</span>
+<span class="sd">           stepdowns, elections, and reconfigs.</span>
+
+<span class="sd">           The :class:`~pymongo.mongo_client.MongoClient` constructor no</span>
+<span class="sd">           longer blocks while connecting to the server or servers, and it no</span>
+<span class="sd">           longer raises :class:`~pymongo.errors.ConnectionFailure` if they</span>
+<span class="sd">           are unavailable, nor :class:`~pymongo.errors.ConfigurationError`</span>
+<span class="sd">           if the user&#39;s credentials are wrong. Instead, the constructor</span>
+<span class="sd">           returns immediately and launches the connection process on</span>
+<span class="sd">           background threads.</span>
+
+<span class="sd">           Therefore the ``alive`` method is removed since it no longer</span>
+<span class="sd">           provides meaningful information; even if the client is disconnected,</span>
+<span class="sd">           it may discover a server in time to fulfill the next operation.</span>
+
+<span class="sd">           In PyMongo 2.x, :class:`~pymongo.MongoClient` accepted a list of</span>
+<span class="sd">           standalone MongoDB servers and used the first it could connect to::</span>
+
+<span class="sd">               MongoClient([&#39;host1.com:27017&#39;, &#39;host2.com:27017&#39;])</span>
+
+<span class="sd">           A list of multiple standalones is no longer supported; if multiple</span>
+<span class="sd">           servers are listed they must be members of the same replica set, or</span>
+<span class="sd">           mongoses in the same sharded cluster.</span>
+
+<span class="sd">           The behavior for a list of mongoses is changed from &quot;high</span>
+<span class="sd">           availability&quot; to &quot;load balancing&quot;. Before, the client connected to</span>
+<span class="sd">           the lowest-latency mongos in the list, and used it until a network</span>
+<span class="sd">           error prompted it to re-evaluate all mongoses&#39; latencies and</span>
+<span class="sd">           reconnect to one of them. In PyMongo 3, the client monitors its</span>
+<span class="sd">           network latency to all the mongoses continuously, and distributes</span>
+<span class="sd">           operations evenly among those with the lowest latency. See</span>
+<span class="sd">           :ref:`mongos-load-balancing` for more information.</span>
+
+<span class="sd">           The ``connect`` option is added.</span>
+
+<span class="sd">           The ``start_request``, ``in_request``, and ``end_request`` methods</span>
+<span class="sd">           are removed, as well as the ``auto_start_request`` option.</span>
+
+<span class="sd">           The ``copy_database`` method is removed, see the</span>
+<span class="sd">           :doc:`copy_database examples &lt;/examples/copydb&gt;` for alternatives.</span>
+
+<span class="sd">           The :meth:`MongoClient.disconnect` method is removed; it was a</span>
+<span class="sd">           synonym for :meth:`~pymongo.MongoClient.close`.</span>
+
+<span class="sd">           :class:`~pymongo.mongo_client.MongoClient` no longer returns an</span>
+<span class="sd">           instance of :class:`~pymongo.database.Database` for attribute names</span>
+<span class="sd">           with leading underscores. You must use dict-style lookups instead::</span>
+
+<span class="sd">               client[&#39;__my_database__&#39;]</span>
+
+<span class="sd">           Not::</span>
+
+<span class="sd">               client.__my_database__</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">host</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HOST</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">string_type</span><span class="p">):</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="p">[</span><span class="n">host</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PORT</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;port must be an instance of int&quot;</span><span class="p">)</span>
+
+        <span class="n">seeds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">dbase</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">host</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">in</span> <span class="n">entity</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;mongodb://&quot;</span><span class="p">):</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="n">uri_parser</span><span class="o">.</span><span class="n">parse_uri</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">seeds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;nodelist&quot;</span><span class="p">])</span>
+                    <span class="n">username</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">username</span>
+                    <span class="n">password</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">password</span>
+                    <span class="n">dbase</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">dbase</span>
+                    <span class="n">opts</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;options&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;://&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">InvalidURI</span><span class="p">(</span><span class="s2">&quot;Invalid URI scheme: &quot;</span>
+                                     <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity</span><span class="p">[:</span><span class="n">idx</span><span class="p">],))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">seeds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">uri_parser</span><span class="o">.</span><span class="n">split_hosts</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">seeds</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">&quot;need to specify at least one host&quot;</span><span class="p">)</span>
+
+        <span class="c1"># _pool_class, _monitor_class, and _condition_class are for deep</span>
+        <span class="c1"># customization of PyMongo, e.g. Motor.</span>
+        <span class="n">pool_class</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_pool_class&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">monitor_class</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_monitor_class&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">condition_class</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_condition_class&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">keyword_opts</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">keyword_opts</span><span class="p">[</span><span class="s1">&#39;document_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">document_class</span>
+        <span class="k">if</span> <span class="n">tz_aware</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tz_aware</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tz_aware&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">connect</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">connect</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;connect&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">keyword_opts</span><span class="p">[</span><span class="s1">&#39;tz_aware&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tz_aware</span>
+        <span class="n">keyword_opts</span><span class="p">[</span><span class="s1">&#39;connect&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">connect</span>
+        <span class="c1"># Validate all keyword options.</span>
+        <span class="n">keyword_opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">common</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">keyword_opts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">keyword_opts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__options</span> <span class="o">=</span> <span class="n">options</span> <span class="o">=</span> <span class="n">ClientOptions</span><span class="p">(</span>
+            <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">dbase</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__default_database_name</span> <span class="o">=</span> <span class="n">dbase</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cursor_manager</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__kill_cursors_queue</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_listeners</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pool_options</span><span class="o">.</span><span class="n">event_listeners</span>
+
+        <span class="c1"># Cache of existing indexes used by ensure_index ops.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MongoClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">codec_options</span><span class="p">,</span>
+                                          <span class="n">options</span><span class="o">.</span><span class="n">read_preference</span><span class="p">,</span>
+                                          <span class="n">options</span><span class="o">.</span><span class="n">write_concern</span><span class="p">,</span>
+                                          <span class="n">options</span><span class="o">.</span><span class="n">read_concern</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__all_credentials</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">creds</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">credentials</span>
+        <span class="k">if</span> <span class="n">creds</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache_credentials</span><span class="p">(</span><span class="n">creds</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">creds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_topology_settings</span> <span class="o">=</span> <span class="n">TopologySettings</span><span class="p">(</span>
+            <span class="n">seeds</span><span class="o">=</span><span class="n">seeds</span><span class="p">,</span>
+            <span class="n">replica_set_name</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">replica_set_name</span><span class="p">,</span>
+            <span class="n">pool_class</span><span class="o">=</span><span class="n">pool_class</span><span class="p">,</span>
+            <span class="n">pool_options</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">pool_options</span><span class="p">,</span>
+            <span class="n">monitor_class</span><span class="o">=</span><span class="n">monitor_class</span><span class="p">,</span>
+            <span class="n">condition_class</span><span class="o">=</span><span class="n">condition_class</span><span class="p">,</span>
+            <span class="n">local_threshold_ms</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">local_threshold_ms</span><span class="p">,</span>
+            <span class="n">server_selection_timeout</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">server_selection_timeout</span><span class="p">,</span>
+            <span class="n">heartbeat_frequency</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">heartbeat_frequency</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span> <span class="o">=</span> <span class="n">Topology</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_topology_settings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">connect</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">target</span><span class="p">():</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">self_ref</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Stop the executor.</span>
+            <span class="n">MongoClient</span><span class="o">.</span><span class="n">_process_periodic_tasks</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">executor</span> <span class="o">=</span> <span class="n">periodic_executor</span><span class="o">.</span><span class="n">PeriodicExecutor</span><span class="p">(</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">common</span><span class="o">.</span><span class="n">KILL_CURSOR_FREQUENCY</span><span class="p">,</span>
+            <span class="n">min_interval</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;pymongo_kill_cursors_thread&quot;</span><span class="p">)</span>
+
+        <span class="c1"># We strongly reference the executor and it weakly references us via</span>
+        <span class="c1"># this closure. When the client is freed, stop the executor soon.</span>
+        <span class="n">self_ref</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">executor</span><span class="o">.</span><span class="n">close</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kill_cursors_executor</span> <span class="o">=</span> <span class="n">executor</span>
+        <span class="n">executor</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_cache_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">credentials</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save a set of authentication credentials.</span>
+
+<span class="sd">        The credentials are used to login a socket whenever one is created.</span>
+<span class="sd">        If `connect` is True, verify the credentials on the server first.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Don&#39;t let other threads affect this call&#39;s data.</span>
+        <span class="n">all_credentials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__all_credentials</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">all_credentials</span><span class="p">:</span>
+            <span class="c1"># Nothing to do if we already have these credentials.</span>
+            <span class="k">if</span> <span class="n">credentials</span> <span class="o">==</span> <span class="n">all_credentials</span><span class="p">[</span><span class="n">source</span><span class="p">]:</span>
+                <span class="k">return</span>
+            <span class="k">raise</span> <span class="n">OperationFailure</span><span class="p">(</span><span class="s1">&#39;Another user is already authenticated &#39;</span>
+                                   <span class="s1">&#39;to this database. You must logout first.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">connect</span><span class="p">:</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_topology</span><span class="p">()</span><span class="o">.</span><span class="n">select_server</span><span class="p">(</span>
+                <span class="n">writable_preferred_server_selector</span><span class="p">)</span>
+
+            <span class="c1"># get_socket() logs out of the database if logged in with old</span>
+            <span class="c1"># credentials, and logs in with new ones.</span>
+            <span class="k">with</span> <span class="n">server</span><span class="o">.</span><span class="n">get_socket</span><span class="p">(</span><span class="n">all_credentials</span><span class="p">)</span> <span class="k">as</span> <span class="n">sock_info</span><span class="p">:</span>
+                <span class="n">sock_info</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">credentials</span><span class="p">)</span>
+
+        <span class="c1"># If several threads run _cache_credentials at once, last one wins.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__all_credentials</span><span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="o">=</span> <span class="n">credentials</span>
+
+    <span class="k">def</span> <span class="nf">_purge_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Purge credentials from the authentication cache.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__all_credentials</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dbname</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Test if `index` is cached.&quot;&quot;&quot;</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache_lock</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">dbname</span> <span class="ow">in</span> <span class="n">cache</span> <span class="ow">and</span>
+                    <span class="n">coll</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">]</span> <span class="ow">and</span>
+                    <span class="n">index</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">][</span><span class="n">coll</span><span class="p">]</span> <span class="ow">and</span>
+                    <span class="n">now</span> <span class="o">&lt;</span> <span class="n">cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">][</span><span class="n">coll</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_cache_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dbname</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">cache_for</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add an index to the index cache for ensure_index operations.&quot;&quot;&quot;</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+        <span class="n">expire</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">cache_for</span><span class="p">)</span> <span class="o">+</span> <span class="n">now</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache_lock</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">database</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">][</span><span class="n">collection</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">][</span><span class="n">collection</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">expire</span>
+
+            <span class="k">elif</span> <span class="n">collection</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">][</span><span class="n">collection</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">][</span><span class="n">collection</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">expire</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">dbname</span><span class="p">][</span><span class="n">collection</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">expire</span>
+
+    <span class="k">def</span> <span class="nf">_purge_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_name</span><span class="p">,</span>
+                     <span class="n">collection_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Purge an index from the index cache.</span>
+
+<span class="sd">        If `index_name` is None purge an entire collection.</span>
+
+<span class="sd">        If `collection_name` is None purge an entire database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache_lock</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">database_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="k">if</span> <span class="n">collection_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">database_name</span><span class="p">]</span>
+                <span class="k">return</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">collection_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">database_name</span><span class="p">]:</span>
+                <span class="k">return</span>
+
+            <span class="k">if</span> <span class="n">index_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">database_name</span><span class="p">][</span><span class="n">collection_name</span><span class="p">]</span>
+                <span class="k">return</span>
+
+            <span class="k">if</span> <span class="n">index_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">database_name</span><span class="p">][</span><span class="n">collection_name</span><span class="p">]:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">__index_cache</span><span class="p">[</span><span class="n">database_name</span><span class="p">][</span><span class="n">collection_name</span><span class="p">][</span><span class="n">index_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_server_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;An attribute of the current server&#39;s description.</span>
+
+<span class="sd">        If the client is not connected, this will block until a connection is</span>
+<span class="sd">        established or raise ServerSelectionTimeoutError if no server is</span>
+<span class="sd">        available.</span>
+
+<span class="sd">        Not threadsafe if used multiple times in a single method, since</span>
+<span class="sd">        the server may change. In such cases, store a local reference to a</span>
+<span class="sd">        ServerDescription first, then use its properties.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">select_server</span><span class="p">(</span>
+            <span class="n">writable_server_selector</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">event_listeners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The event listeners registered for this client.</span>
+
+<span class="sd">        See :mod:`~pymongo.monitoring` for details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_listeners</span><span class="o">.</span><span class="n">event_listeners</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;(host, port) of the current standalone, primary, or mongos, or None.</span>
+
+<span class="sd">        Accessing :attr:`address` raises :exc:`~.errors.InvalidOperation` if</span>
+<span class="sd">        the client is load-balancing among mongoses, since there is no single</span>
+<span class="sd">        address. Use :attr:`nodes` instead.</span>
+
+<span class="sd">        If the client is not connected, this will block until a connection is</span>
+<span class="sd">        established or raise ServerSelectionTimeoutError if no server is</span>
+<span class="sd">        available.</span>
+
+<span class="sd">        .. versionadded:: 3.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">topology_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">_description</span><span class="o">.</span><span class="n">topology_type</span>
+        <span class="k">if</span> <span class="n">topology_type</span> <span class="o">==</span> <span class="n">TOPOLOGY_TYPE</span><span class="o">.</span><span class="n">Sharded</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidOperation</span><span class="p">(</span>
+                <span class="s1">&#39;Cannot use &quot;address&quot; property when load balancing among&#39;</span>
+                <span class="s1">&#39; mongoses, use &quot;nodes&quot; instead.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">topology_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TOPOLOGY_TYPE</span><span class="o">.</span><span class="n">ReplicaSetWithPrimary</span><span class="p">,</span>
+                                 <span class="n">TOPOLOGY_TYPE</span><span class="o">.</span><span class="n">Single</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_property</span><span class="p">(</span><span class="s1">&#39;address&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">primary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The (host, port) of the current primary of the replica set.</span>
+
+<span class="sd">        Returns ``None`` if this client is not connected to a replica set,</span>
+<span class="sd">        there is no primary, or this client was created without the</span>
+<span class="sd">        `replicaSet` option.</span>
+
+<span class="sd">        .. versionadded:: 3.0</span>
+<span class="sd">           MongoClient gained this property in version 3.0 when</span>
+<span class="sd">           MongoReplicaSetClient&#39;s functionality was merged in.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">get_primary</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">secondaries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The secondary members known to this client.</span>
+
+<span class="sd">        A sequence of (host, port) pairs. Empty if this client is not</span>
+<span class="sd">        connected to a replica set, there are no visible secondaries, or this</span>
+<span class="sd">        client was created without the `replicaSet` option.</span>
+
+<span class="sd">        .. versionadded:: 3.0</span>
+<span class="sd">           MongoClient gained this property in version 3.0 when</span>
+<span class="sd">           MongoReplicaSetClient&#39;s functionality was merged in.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">get_secondaries</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">arbiters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Arbiters in the replica set.</span>
+
+<span class="sd">        A sequence of (host, port) pairs. Empty if this client is not</span>
+<span class="sd">        connected to a replica set, there are no arbiters, or this client was</span>
+<span class="sd">        created without the `replicaSet` option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">get_arbiters</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_primary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If this client is connected to a server that can accept writes.</span>
+
+<span class="sd">        True if the current server is a standalone, mongos, or the primary of</span>
+<span class="sd">        a replica set. If the client is not connected, this will block until a</span>
+<span class="sd">        connection is established or raise ServerSelectionTimeoutError if no</span>
+<span class="sd">        server is available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_property</span><span class="p">(</span><span class="s1">&#39;is_writable&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_mongos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If this client is connected to mongos. If the client is not</span>
+<span class="sd">        connected, this will block until a connection is established or raise</span>
+<span class="sd">        ServerSelectionTimeoutError if no server is available..</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_property</span><span class="p">(</span><span class="s1">&#39;server_type&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">SERVER_TYPE</span><span class="o">.</span><span class="n">Mongos</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_pool_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The maximum allowable number of concurrent connections to each</span>
+<span class="sd">        connected server. Requests to a server will block if there are</span>
+<span class="sd">        `maxPoolSize` outstanding connections to the requested server.</span>
+<span class="sd">        Defaults to 100. Cannot be 0.</span>
+
+<span class="sd">        When a server&#39;s pool has reached `max_pool_size`, operations for that</span>
+<span class="sd">        server block waiting for a socket to be returned to the pool. If</span>
+<span class="sd">        ``waitQueueTimeoutMS`` is set, a blocked operation will raise</span>
+<span class="sd">        :exc:`~pymongo.errors.ConnectionFailure` after a timeout.</span>
+<span class="sd">        By default ``waitQueueTimeoutMS`` is not set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">pool_options</span><span class="o">.</span><span class="n">max_pool_size</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_pool_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The minimum required number of concurrent connections that the pool</span>
+<span class="sd">        will maintain to each connected server. Default is 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">pool_options</span><span class="o">.</span><span class="n">min_pool_size</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_idle_time_ms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The maximum number of milliseconds that a connection can remain</span>
+<span class="sd">        idle in the pool before being removed and replaced. Defaults to</span>
+<span class="sd">        `None` (no limit).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">pool_options</span><span class="o">.</span><span class="n">max_idle_time_ms</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set of all currently connected servers.</span>
+
+<span class="sd">        .. warning:: When connected to a replica set the value of :attr:`nodes`</span>
+<span class="sd">          can change over time as :class:`MongoClient`&#39;s view of the replica</span>
+<span class="sd">          set changes. :attr:`nodes` can also be an empty set when</span>
+<span class="sd">          :class:`MongoClient` is first instantiated and hasn&#39;t yet connected</span>
+<span class="sd">          to any servers, or a network partition causes it to lose connection</span>
+<span class="sd">          to all servers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">description</span>
+        <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">address</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">description</span><span class="o">.</span><span class="n">known_servers</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_bson_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The largest BSON object the connected server accepts in bytes.</span>
+
+<span class="sd">        If the client is not connected, this will block until a connection is</span>
+<span class="sd">        established or raise ServerSelectionTimeoutError if no server is</span>
+<span class="sd">        available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_property</span><span class="p">(</span><span class="s1">&#39;max_bson_size&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_message_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The largest message the connected server accepts in bytes.</span>
+
+<span class="sd">        If the client is not connected, this will block until a connection is</span>
+<span class="sd">        established or raise ServerSelectionTimeoutError if no server is</span>
+<span class="sd">        available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_property</span><span class="p">(</span><span class="s1">&#39;max_message_size&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_write_batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The maxWriteBatchSize reported by the server.</span>
+
+<span class="sd">        If the client is not connected, this will block until a connection is</span>
+<span class="sd">        established or raise ServerSelectionTimeoutError if no server is</span>
+<span class="sd">        available.</span>
+
+<span class="sd">        Returns a default value when connected to server versions prior to</span>
+<span class="sd">        MongoDB 2.6.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_property</span><span class="p">(</span><span class="s1">&#39;max_write_batch_size&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">local_threshold_ms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The local threshold for this instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">local_threshold_ms</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">server_selection_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The server selection timeout for this instance in seconds.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">server_selection_timeout</span>
+
+    <span class="k">def</span> <span class="nf">_is_writable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attempt to connect to a writable server, or return False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_topology</span><span class="p">()</span>  <span class="c1"># Starts monitors if necessary.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">svr</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">select_server</span><span class="p">(</span><span class="n">writable_server_selector</span><span class="p">)</span>
+
+            <span class="c1"># When directly connected to a secondary, arbiter, etc.,</span>
+            <span class="c1"># select_server returns it, whatever the selector. Check</span>
+            <span class="c1"># again if the server is writable.</span>
+            <span class="k">return</span> <span class="n">svr</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">is_writable</span>
+        <span class="k">except</span> <span class="n">ConnectionFailure</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Disconnect from MongoDB.</span>
+
+<span class="sd">        Close all sockets in the connection pools and stop the monitor threads.</span>
+<span class="sd">        If this instance is used again it will be automatically re-opened and</span>
+<span class="sd">        the threads restarted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_cursor_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manager_class</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;DEPRECATED - Set this client&#39;s cursor manager.</span>
+
+<span class="sd">        Raises :class:`TypeError` if `manager_class` is not a subclass of</span>
+<span class="sd">        :class:`~pymongo.cursor_manager.CursorManager`. A cursor manager</span>
+<span class="sd">        handles closing cursors. Different managers can implement different</span>
+<span class="sd">        policies in terms of when to actually kill a cursor that has</span>
+<span class="sd">        been closed.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `manager_class`: cursor manager to use</span>
+
+<span class="sd">        .. versionchanged:: 3.3</span>
+<span class="sd">           Deprecated, for real this time.</span>
+
+<span class="sd">        .. versionchanged:: 3.0</span>
+<span class="sd">           Undeprecated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;set_cursor_manager is Deprecated&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">manager_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">CursorManager</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;manager_class must be a subclass of &quot;</span>
+                            <span class="s2">&quot;CursorManager&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cursor_manager</span> <span class="o">=</span> <span class="n">manager</span>
+
+    <span class="k">def</span> <span class="nf">_get_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the internal :class:`~pymongo.topology.Topology` object.</span>
+
+<span class="sd">        If this client was created with &quot;connect=False&quot;, calling _get_topology</span>
+<span class="sd">        launches the connection process in the background.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span>
+
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">_get_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_topology</span><span class="p">()</span><span class="o">.</span><span class="n">select_server</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">server</span><span class="o">.</span><span class="n">get_socket</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__all_credentials</span><span class="p">)</span> <span class="k">as</span> <span class="n">sock_info</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">sock_info</span>
+        <span class="k">except</span> <span class="n">NetworkTimeout</span><span class="p">:</span>
+            <span class="c1"># The socket has been closed. Don&#39;t reset the server.</span>
+            <span class="c1"># Server Discovery And Monitoring Spec: &quot;When an application</span>
+            <span class="c1"># operation fails because of any network error besides a socket</span>
+            <span class="c1"># timeout....&quot;</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="n">NotMasterError</span><span class="p">:</span>
+            <span class="c1"># &quot;When the client sees a &quot;not master&quot; error it MUST replace the</span>
+            <span class="c1"># server&#39;s description with type Unknown. It MUST request an</span>
+            <span class="c1"># immediate check of the server.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_server_and_request_check</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="n">ConnectionFailure</span><span class="p">:</span>
+            <span class="c1"># &quot;Client MUST replace the server&#39;s description with type Unknown</span>
+            <span class="c1"># ... MUST NOT request an immediate check of the server.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__reset_server</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">def</span> <span class="nf">_socket_for_writes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_socket</span><span class="p">(</span><span class="n">writable_server_selector</span><span class="p">)</span>
+
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">_socket_for_reads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read_preference</span><span class="p">):</span>
+        <span class="n">preference</span> <span class="o">=</span> <span class="n">read_preference</span> <span class="ow">or</span> <span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span>
+        <span class="c1"># Get a socket for a server matching the read preference, and yield</span>
+        <span class="c1"># sock_info, slave_ok. Server Selection Spec: &quot;slaveOK must be sent to</span>
+        <span class="c1"># mongods with topology type Single. If the server type is Mongos,</span>
+        <span class="c1"># follow the rules for passing read preference to mongos, even for</span>
+        <span class="c1"># topology type Single.&quot;</span>
+        <span class="c1"># Thread safe: if the type is single it cannot change.</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_topology</span><span class="p">()</span>
+        <span class="n">single</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">topology_type</span> <span class="o">==</span> <span class="n">TOPOLOGY_TYPE</span><span class="o">.</span><span class="n">Single</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_socket</span><span class="p">(</span><span class="n">read_preference</span><span class="p">)</span> <span class="k">as</span> <span class="n">sock_info</span><span class="p">:</span>
+            <span class="n">slave_ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">single</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sock_info</span><span class="o">.</span><span class="n">is_mongos</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">preference</span> <span class="o">!=</span> <span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">sock_info</span><span class="p">,</span> <span class="n">slave_ok</span>
+
+    <span class="k">def</span> <span class="nf">_send_message_with_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">read_preference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="n">exhaust</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a message to MongoDB and return a Response.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `operation`: a _Query or _GetMore object.</span>
+<span class="sd">          - `read_preference` (optional): A ReadPreference.</span>
+<span class="sd">          - `exhaust` (optional): If True, the socket used stays checked out.</span>
+<span class="sd">            It is returned along with its Pool in the Response.</span>
+<span class="sd">          - `address` (optional): Optional address when sending a message</span>
+<span class="sd">            to a specific server, used for getMore.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
+            <span class="c1"># If needed, restart kill-cursors thread after a fork.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kill_cursors_executor</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+        <span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_topology</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">address</span><span class="p">:</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">select_server_by_address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">server</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">AutoReconnect</span><span class="p">(</span><span class="s1">&#39;server </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> no longer available&#39;</span>
+                                    <span class="o">%</span> <span class="n">address</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">selector</span> <span class="o">=</span> <span class="n">read_preference</span> <span class="ow">or</span> <span class="n">writable_server_selector</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">select_server</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="c1"># A _Query&#39;s slaveOk bit is already set for queries with non-primary</span>
+        <span class="c1"># read preference. If this is a direct connection to a mongod, override</span>
+        <span class="c1"># and *always* set the slaveOk bit. See bullet point 2 in</span>
+        <span class="c1"># server-selection.rst#topology-type-single.</span>
+        <span class="n">set_slave_ok</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">topology</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">topology_type</span> <span class="o">==</span> <span class="n">TOPOLOGY_TYPE</span><span class="o">.</span><span class="n">Single</span>
+            <span class="ow">and</span> <span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">server_type</span> <span class="o">!=</span> <span class="n">SERVER_TYPE</span><span class="o">.</span><span class="n">Mongos</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_on_error</span><span class="p">(</span>
+            <span class="n">server</span><span class="p">,</span>
+            <span class="n">server</span><span class="o">.</span><span class="n">send_message_with_response</span><span class="p">,</span>
+            <span class="n">operation</span><span class="p">,</span>
+            <span class="n">set_slave_ok</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__all_credentials</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_listeners</span><span class="p">,</span>
+            <span class="n">exhaust</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reset_on_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute an operation. Reset the server on network error.</span>
+
+<span class="sd">        Returns fn()&#39;s return value on success. On error, clears the server&#39;s</span>
+<span class="sd">        pool and marks the server Unknown.</span>
+
+<span class="sd">        Re-raises any exception thrown by fn().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NetworkTimeout</span><span class="p">:</span>
+            <span class="c1"># The socket has been closed. Don&#39;t reset the server.</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="n">ConnectionFailure</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__reset_server</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">def</span> <span class="nf">__reset_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clear our connection pool for a server and mark it Unknown.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">reset_server</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reset_server_and_request_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clear our pool for a server, mark it Unknown, and check it soon.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">reset_server_and_request_check</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">address</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">_repr_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">option_repr</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Fix options whose __repr__ isn&#39;t usable in a constructor.&quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;document_class&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s1">&#39;document_class=dict&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s1">&#39;document_class=</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
+                                                     <span class="n">value</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">common</span><span class="o">.</span><span class="n">TIMEOUT_VALIDATORS</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># Host first...</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;host=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">[</span>
+            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">host</span>
+            <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topology_settings</span><span class="o">.</span><span class="n">seeds</span><span class="p">]]</span>
+        <span class="c1"># ... then everything in self._constructor_args...</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">option_repr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">_options</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constructor_args</span><span class="p">)</span>
+        <span class="c1"># ... then everything else.</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">option_repr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">_options</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__options</span><span class="o">.</span><span class="n">_options</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_constructor_args</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;MongoClient(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_repr_helper</span><span class="p">(),))</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a database by name.</span>
+
+<span class="sd">        Raises :class:`~pymongo.errors.InvalidName` if an invalid</span>
+<span class="sd">        database name is used.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `name`: the name of the database to get</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="s2">&quot;MongoClient has no attribute </span><span class="si">%r</span><span class="s2">. To access the </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; database, use client[</span><span class="si">%r</span><span class="s2">].&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a database by name.</span>
+
+<span class="sd">        Raises :class:`~pymongo.errors.InvalidName` if an invalid</span>
+<span class="sd">        database name is used.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `name`: the name of the database to get</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">database</span><span class="o">.</span><span class="n">Database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">close_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor_id</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Send a kill cursors message soon with the given id.</span>
+
+<span class="sd">        Raises :class:`TypeError` if `cursor_id` is not an instance of</span>
+<span class="sd">        ``(int, long)``. What closing the cursor actually means</span>
+<span class="sd">        depends on this client&#39;s cursor manager.</span>
+
+<span class="sd">        This method may be called from a :class:`~pymongo.cursor.Cursor`</span>
+<span class="sd">        destructor during garbage collection, so it isn&#39;t safe to take a</span>
+<span class="sd">        lock or do network I/O. Instead, we schedule the cursor to be closed</span>
+<span class="sd">        soon on a background thread.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `cursor_id`: id of cursor to close</span>
+<span class="sd">          - `address` (optional): (host, port) pair of the cursor&#39;s server.</span>
+<span class="sd">            If it is not provided, the client attempts to close the cursor on</span>
+<span class="sd">            the primary or standalone, or a mongos server.</span>
+
+<span class="sd">        .. versionchanged:: 3.0</span>
+<span class="sd">           Added ``address`` parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cursor_id</span><span class="p">,</span> <span class="n">integer_types</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;cursor_id must be an instance of (int, long)&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cursor_manager</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__cursor_manager</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">cursor_id</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__kill_cursors_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">address</span><span class="p">,</span> <span class="p">[</span><span class="n">cursor_id</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">kill_cursors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor_ids</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;DEPRECATED - Send a kill cursors message soon with the given ids.</span>
+
+<span class="sd">        Raises :class:`TypeError` if `cursor_ids` is not an instance of</span>
+<span class="sd">        ``list``.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `cursor_ids`: list of cursor ids to kill</span>
+<span class="sd">          - `address` (optional): (host, port) pair of the cursor&#39;s server.</span>
+<span class="sd">            If it is not provided, the client attempts to close the cursor on</span>
+<span class="sd">            the primary or standalone, or a mongos server.</span>
+
+<span class="sd">        .. versionchanged:: 3.3</span>
+<span class="sd">           Deprecated.</span>
+
+<span class="sd">        .. versionchanged:: 3.0</span>
+<span class="sd">           Now accepts an `address` argument. Schedules the cursors to be</span>
+<span class="sd">           closed on a background thread instead of sending the message</span>
+<span class="sd">           immediately.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;kill_cursors is deprecated.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cursor_ids</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;cursor_ids must be a list&quot;</span><span class="p">)</span>
+
+        <span class="c1"># &quot;Atomic&quot;, needs no lock.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__kill_cursors_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">address</span><span class="p">,</span> <span class="n">cursor_ids</span><span class="p">))</span>
+
+    <span class="c1"># This method is run periodically by a background thread.</span>
+    <span class="k">def</span> <span class="nf">_process_periodic_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Process any pending kill cursors requests and</span>
+<span class="sd">        maintain connection pool parameters.&quot;&quot;&quot;</span>
+        <span class="n">address_to_cursor_ids</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+        <span class="c1"># Other threads or the GC may append to the queue concurrently.</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">address</span><span class="p">,</span> <span class="n">cursor_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__kill_cursors_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">address_to_cursor_ids</span><span class="p">[</span><span class="n">address</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cursor_ids</span><span class="p">)</span>
+
+        <span class="c1"># Don&#39;t re-open topology if it&#39;s closed and there&#39;s no pending cursors.</span>
+        <span class="k">if</span> <span class="n">address_to_cursor_ids</span><span class="p">:</span>
+            <span class="n">listeners</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_listeners</span>
+            <span class="n">publish</span> <span class="o">=</span> <span class="n">listeners</span><span class="o">.</span><span class="n">enabled_for_commands</span>
+            <span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_topology</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">address</span><span class="p">,</span> <span class="n">cursor_ids</span> <span class="ow">in</span> <span class="n">address_to_cursor_ids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">address</span><span class="p">:</span>
+                        <span class="c1"># address could be a tuple or _CursorAddress, but</span>
+                        <span class="c1"># select_server_by_address needs (host, port).</span>
+                        <span class="n">server</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">select_server_by_address</span><span class="p">(</span>
+                            <span class="nb">tuple</span><span class="p">(</span><span class="n">address</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Application called close_cursor() with no address.</span>
+                        <span class="n">server</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">select_server</span><span class="p">(</span>
+                            <span class="n">writable_server_selector</span><span class="p">)</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">namespace</span> <span class="o">=</span> <span class="n">address</span><span class="o">.</span><span class="n">namespace</span>
+                        <span class="n">db</span><span class="p">,</span> <span class="n">coll</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="n">namespace</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">db</span> <span class="o">=</span> <span class="n">coll</span> <span class="o">=</span> <span class="s2">&quot;OP_KILL_CURSORS&quot;</span>
+
+                    <span class="n">spec</span> <span class="o">=</span> <span class="n">SON</span><span class="p">([(</span><span class="s1">&#39;killCursors&#39;</span><span class="p">,</span> <span class="n">coll</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s1">&#39;cursors&#39;</span><span class="p">,</span> <span class="n">cursor_ids</span><span class="p">)])</span>
+                    <span class="k">with</span> <span class="n">server</span><span class="o">.</span><span class="n">get_socket</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__all_credentials</span><span class="p">)</span> <span class="k">as</span> <span class="n">sock_info</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">sock_info</span><span class="o">.</span><span class="n">max_wire_version</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span>
+                                <span class="n">namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                            <span class="n">sock_info</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">publish</span><span class="p">:</span>
+                                <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                            <span class="n">request_id</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">kill_cursors</span><span class="p">(</span><span class="n">cursor_ids</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">publish</span><span class="p">:</span>
+                                <span class="n">duration</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+                                <span class="n">listeners</span><span class="o">.</span><span class="n">publish_command_start</span><span class="p">(</span>
+                                    <span class="n">spec</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+                                <span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">sock_info</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">publish</span><span class="p">:</span>
+                                    <span class="n">dur</span> <span class="o">=</span> <span class="p">((</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+                                           <span class="o">+</span> <span class="n">duration</span><span class="p">)</span>
+                                    <span class="n">listeners</span><span class="o">.</span><span class="n">publish_command_failure</span><span class="p">(</span>
+                                        <span class="n">dur</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">_convert_exception</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
+                                        <span class="s1">&#39;killCursors&#39;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+                                <span class="k">raise</span>
+
+                            <span class="k">if</span> <span class="n">publish</span><span class="p">:</span>
+                                <span class="n">duration</span> <span class="o">=</span> <span class="p">((</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+                                            <span class="o">+</span> <span class="n">duration</span><span class="p">)</span>
+                                <span class="c1"># OP_KILL_CURSORS returns no reply, fake one.</span>
+                                <span class="n">reply</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cursorsUnknown&#39;</span><span class="p">:</span> <span class="n">cursor_ids</span><span class="p">,</span> <span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                                <span class="n">listeners</span><span class="o">.</span><span class="n">publish_command_success</span><span class="p">(</span>
+                                    <span class="n">duration</span><span class="p">,</span> <span class="n">reply</span><span class="p">,</span> <span class="s1">&#39;killCursors&#39;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span>
+                                    <span class="n">address</span><span class="p">)</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">helpers</span><span class="o">.</span><span class="n">_handle_exception</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_topology</span><span class="o">.</span><span class="n">update_pool</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">helpers</span><span class="o">.</span><span class="n">_handle_exception</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">server_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get information about the MongoDB server we&#39;re connected to.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;buildinfo&quot;</span><span class="p">,</span>
+                                  <span class="n">read_preference</span><span class="o">=</span><span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">database_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a list of the names of all databases on the connected server.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">db</span> <span class="ow">in</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_database_default_options</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">command</span><span class="p">(</span>
+                    <span class="s2">&quot;listDatabases&quot;</span><span class="p">)[</span><span class="s2">&quot;databases&quot;</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">drop_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_or_database</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Drop a database.</span>
+
+<span class="sd">        Raises :class:`TypeError` if `name_or_database` is not an instance of</span>
+<span class="sd">        :class:`basestring` (:class:`str` in python 3) or</span>
+<span class="sd">        :class:`~pymongo.database.Database`.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `name_or_database`: the name of a database to drop, or a</span>
+<span class="sd">            :class:`~pymongo.database.Database` instance representing the</span>
+<span class="sd">            database to drop</span>
+
+<span class="sd">        .. note:: The :attr:`~pymongo.mongo_client.MongoClient.write_concern` of</span>
+<span class="sd">           this client is automatically applied to this operation when using</span>
+<span class="sd">           MongoDB &gt;= 3.4.</span>
+
+<span class="sd">        .. versionchanged:: 3.4</span>
+<span class="sd">           Apply this client&#39;s write concern automatically to this operation</span>
+<span class="sd">           when connected to MongoDB &gt;= 3.4.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name_or_database</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">database</span><span class="o">.</span><span class="n">Database</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">string_type</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;name_or_database must be an instance &quot;</span>
+                            <span class="s2">&quot;of </span><span class="si">%s</span><span class="s2"> or a Database&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">string_type</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_purge_index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_socket_for_reads</span><span class="p">(</span>
+                <span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">sock_info</span><span class="p">,</span> <span class="n">slave_ok</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span>
+                <span class="n">sock_info</span><span class="p">,</span>
+                <span class="s2">&quot;dropDatabase&quot;</span><span class="p">,</span>
+                <span class="n">slave_ok</span><span class="o">=</span><span class="n">slave_ok</span><span class="p">,</span>
+                <span class="n">read_preference</span><span class="o">=</span><span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">,</span>
+                <span class="n">write_concern</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">write_concern</span><span class="p">,</span>
+                <span class="n">parse_write_concern_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_default_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the database named in the MongoDB connection URI.</span>
+
+<span class="sd">        &gt;&gt;&gt; uri = &#39;mongodb://host/my_database&#39;</span>
+<span class="sd">        &gt;&gt;&gt; client = MongoClient(uri)</span>
+<span class="sd">        &gt;&gt;&gt; db = client.get_default_database()</span>
+<span class="sd">        &gt;&gt;&gt; assert db.name == &#39;my_database&#39;</span>
+
+<span class="sd">        Useful in scripts where you want to choose which database to use</span>
+<span class="sd">        based only on the URI in a configuration file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__default_database_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s1">&#39;No default database defined&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__default_database_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">codec_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_preference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">write_concern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">read_concern</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a :class:`~pymongo.database.Database` with the given name and</span>
+<span class="sd">        options.</span>
+
+<span class="sd">        Useful for creating a :class:`~pymongo.database.Database` with</span>
+<span class="sd">        different codec options, read preference, and/or write concern from</span>
+<span class="sd">        this :class:`MongoClient`.</span>
+
+<span class="sd">          &gt;&gt;&gt; client.read_preference</span>
+<span class="sd">          Primary()</span>
+<span class="sd">          &gt;&gt;&gt; db1 = client.test</span>
+<span class="sd">          &gt;&gt;&gt; db1.read_preference</span>
+<span class="sd">          Primary()</span>
+<span class="sd">          &gt;&gt;&gt; from pymongo import ReadPreference</span>
+<span class="sd">          &gt;&gt;&gt; db2 = client.get_database(</span>
+<span class="sd">          ...     &#39;test&#39;, read_preference=ReadPreference.SECONDARY)</span>
+<span class="sd">          &gt;&gt;&gt; db2.read_preference</span>
+<span class="sd">          Secondary(tag_sets=None)</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">          - `name`: The name of the database - a string.</span>
+<span class="sd">          - `codec_options` (optional): An instance of</span>
+<span class="sd">            :class:`~bson.codec_options.CodecOptions`. If ``None`` (the</span>
+<span class="sd">            default) the :attr:`codec_options` of this :class:`MongoClient` is</span>
+<span class="sd">            used.</span>
+<span class="sd">          - `read_preference` (optional): The read preference to use. If</span>
+<span class="sd">            ``None`` (the default) the :attr:`read_preference` of this</span>
+<span class="sd">            :class:`MongoClient` is used. See :mod:`~pymongo.read_preferences`</span>
+<span class="sd">            for options.</span>
+<span class="sd">          - `write_concern` (optional): An instance of</span>
+<span class="sd">            :class:`~pymongo.write_concern.WriteConcern`. If ``None`` (the</span>
+<span class="sd">            default) the :attr:`write_concern` of this :class:`MongoClient` is</span>
+<span class="sd">            used.</span>
+<span class="sd">          - `read_concern` (optional): An instance of</span>
+<span class="sd">            :class:`~pymongo.read_concern.ReadConcern`. If ``None`` (the</span>
+<span class="sd">            default) the :attr:`read_concern` of this :class:`MongoClient` is</span>
+<span class="sd">            used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">database</span><span class="o">.</span><span class="n">Database</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">codec_options</span><span class="p">,</span> <span class="n">read_preference</span><span class="p">,</span>
+            <span class="n">write_concern</span><span class="p">,</span> <span class="n">read_concern</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_database_default_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a Database instance with the default settings.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_database</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">codec_options</span><span class="o">=</span><span class="n">DEFAULT_CODEC_OPTIONS</span><span class="p">,</span>
+            <span class="n">read_preference</span><span class="o">=</span><span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">,</span>
+            <span class="n">write_concern</span><span class="o">=</span><span class="n">WriteConcern</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_locked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Is this server locked? While locked, all write operations</span>
+<span class="sd">        are blocked, although read operations may still be allowed.</span>
+<span class="sd">        Use :meth:`unlock` to unlock.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ops</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database_default_options</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">current_op</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">ops</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fsyncLock&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">fsync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flush all pending writes to datafiles.</span>
+
+<span class="sd">        :Parameters:</span>
+
+<span class="sd">            Optional parameters can be passed as keyword arguments:</span>
+
+<span class="sd">            - `lock`: If True lock the server to disallow writes.</span>
+<span class="sd">            - `async`: If True don&#39;t block while synchronizing.</span>
+
+<span class="sd">            .. warning:: `async` and `lock` can not be used together.</span>
+
+<span class="sd">            .. warning:: MongoDB does not support the `async` option</span>
+<span class="sd">                         on Windows and will raise an exception on that</span>
+<span class="sd">                         platform.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">admin</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;fsync&quot;</span><span class="p">,</span>
+                           <span class="n">read_preference</span><span class="o">=</span><span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">unlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Unlock a previously locked server.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fsyncUnlock&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_socket_for_writes</span><span class="p">()</span> <span class="k">as</span> <span class="n">sock_info</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sock_info</span><span class="o">.</span><span class="n">max_wire_version</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">sock_info</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">OperationFailure</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                    <span class="c1"># Ignore &quot;DB not locked&quot; to replicate old behavior</span>
+                    <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="mi">125</span><span class="p">:</span>
+                        <span class="k">raise</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">helpers</span><span class="o">.</span><span class="n">_first_batch</span><span class="p">(</span><span class="n">sock_info</span><span class="p">,</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;$cmd.sys.unlock&quot;</span><span class="p">,</span>
+                    <span class="p">{},</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_options</span><span class="p">,</span>
+                    <span class="n">ReadPreference</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_listeners</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;MongoClient&#39; object is not iterable&quot;</span><span class="p">)</span>
+
+    <span class="nb">next</span> <span class="o">=</span> <span class="fm">__next__</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Jaehoon H., Chet L., Conor S., Katshuri K..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

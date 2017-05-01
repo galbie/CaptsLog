@@ -8,3 +8,4 @@ sphinxcontrib-napoleon
 coverage
 flake8
 codecov
+sphinx_rtd_theme

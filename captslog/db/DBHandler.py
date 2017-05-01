@@ -52,13 +52,13 @@ class DBHandlerClass:
                   ' the target machine actively refused it')
             return True
 
-    def insert_to_entries_table(self, title, tags, content):
+    def insert_to_entries_table(self, title, tags, markdown_text):
         """Insert Data into the Entries_Table in the Database
 
         Args:
             title (str): Title of the Journel Entry
             tags (list): Tags for the Entry
-            content(str): Content of the Entry(Markdown text)
+            markdown_text(str): Content of the Entry(Markdown text)
 
         return:
             result(bool): True for success or False for failure
@@ -71,7 +71,7 @@ class DBHandlerClass:
                  "Date_Created": datetime.now(),
                  "Last_Modified": datetime.now(),
                  "Tags": tags,
-                 "Content": content}
+                 "MarkdownFile": markdown_text}
         t = self.db["Entries_Table"]
         try:
             if t.insert_one(entry):
@@ -213,3 +213,4 @@ class DBHandlerClass:
             print('ERROR : No connection could be made because'
                   'the target machine actively refused it')
             return None
+

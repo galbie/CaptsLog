@@ -7,6 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
+from centralwidget import CentralWidget
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -24,13 +25,14 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 
-class Ui_MainWindow(object):
+# Main Window GUI
+class Ui_MainWindow(QtGui.QMainWindow):
 
     def setupUi(self, MainWindow):
         """Setting up Main window UI.
         """
-        MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(550, 682)
+        self.setObjectName(_fromUtf8("MainWindow"))
+        self.resize(550, 600)
 
         # Size Policy
         sizePolicy = QtGui.QSizePolicy(
@@ -38,82 +40,17 @@ class Ui_MainWindow(object):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
-            MainWindow.sizePolicy().hasHeightForWidth())
+            self.sizePolicy().hasHeightForWidth())
 
         # Main Window
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
         MainWindow.setDocumentMode(False)
-
-        # Central Widget
-        self.centralWidget = QtGui.QWidget(MainWindow)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.centralWidget.sizePolicy().hasHeightForWidth())
-        self.centralWidget.setSizePolicy(sizePolicy)
-        self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
-
-        # Horizontal Layout 7, Journal Table Layout
-        self.horizontalLayout_7 = QtGui.QHBoxLayout(self.centralWidget)
-        self.horizontalLayout_7.setMargin(11)
-        self.horizontalLayout_7.setSpacing(6)
-        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
-        self.journalTableLayout = QtGui.QHBoxLayout()
-        self.journalTableLayout.setMargin(11)
-        self.journalTableLayout.setSpacing(6)
-        self.journalTableLayout.setObjectName(_fromUtf8("journalTableLayout"))
-        self.journalList = QtGui.QListWidget(self.centralWidget)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-
-        # Journal List
-        sizePolicy.setHeightForWidth(
-            self.journalList.sizePolicy().hasHeightForWidth())
-        self.journalList.setSizePolicy(sizePolicy)
-        self.journalList.setMinimumSize(QtCore.QSize(100, 600))
-        self.journalList.setMaximumSize(QtCore.QSize(250, 16777215))
-        self.journalList.setObjectName(_fromUtf8("journalList"))
-        self.journalTableLayout.addWidget(self.journalList)
-
-        # Journal Entry Layout
-        self.horizontalLayout_7.addLayout(self.journalTableLayout)
-        self.journalEntryLayout = QtGui.QHBoxLayout()
-        self.journalEntryLayout.setMargin(11)
-        self.journalEntryLayout.setSpacing(6)
-        self.journalEntryLayout.setObjectName(_fromUtf8("journalEntryLayout"))
-        self.journalEntry = QtGui.QPlainTextEdit(self.centralWidget)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.journalEntry.sizePolicy().hasHeightForWidth())
-
-        # Journal Entry
-        self.journalEntry.setSizePolicy(sizePolicy)
-        self.journalEntry.setMinimumSize(QtCore.QSize(200, 600))
-        self.journalEntry.setObjectName(_fromUtf8("journalEntry"))
-        self.journalEntryLayout.addWidget(self.journalEntry)
-        self.horizontalLayout_7.addLayout(self.journalEntryLayout)
-
-        # Journal View Layout
-        self.journalViewLayout = QtGui.QHBoxLayout()
-        self.journalViewLayout.setMargin(11)
-        self.journalViewLayout.setSpacing(6)
-        self.journalViewLayout.setObjectName(_fromUtf8("journalViewLayout"))
-
-        # Journal View
-        self.journalView = QtGui.QTextEdit(self.centralWidget)
-        self.journalView.setMinimumSize(QtCore.QSize(200, 600))
-        self.journalView.setObjectName(_fromUtf8("journalView"))
-        self.journalViewLayout.addWidget(self.journalView)
-        self.horizontalLayout_7.addLayout(self.journalViewLayout)
-        MainWindow.setCentralWidget(self.centralWidget)
+        self.center_widget = CentralWidget(MainWindow)
+        _widget = QtGui.QWidget()
+        _layout = QtGui.QVBoxLayout(_widget)
+        _layout.addWidget(self.center_widget)
+        MainWindow.setCentralWidget(_widget)
 
         # Menu Bar
         self.menuBar = QtGui.QMenuBar(MainWindow)
@@ -141,13 +78,3 @@ class Ui_MainWindow(object):
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.actionNew_Entry.setText(
             _translate("MainWindow", "New Entry", None))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Form = QtGui.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())

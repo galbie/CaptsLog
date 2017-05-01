@@ -19,10 +19,12 @@
 #
 import os
 import sys
+import sphinx_rtd_theme
 # sys.path.insert(0, os.path.abspath('.'))
 # sys.path.insert(0, os.path.abspath('extensions'))
-sys.path.insert(0, os.path.abspath('../captslog/'))
-sys.path.append(os.path.join(os.path.dirname(__name__), '../captslog'))
+# sys.path.insert(0, os.path.abspath('../captslog/'))
+# sys.path.insert(0, os.path.abspath("../captslog"))
+sys.path.append(os.path.join(os.path.dirname(__name__), '../../'))
 
 
 # -- General configuration ------------------------------------------------
@@ -34,6 +36,7 @@ sys.path.append(os.path.join(os.path.dirname(__name__), '../captslog'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
 extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -158,6 +161,10 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'CaptsLog', 'CaptsLog Documentation',
-     author, 'CaptsLog', 'One line description of project.',
+     author, 'CaptsLog', 'Markdown Journal.',
      'Miscellaneous'),
 ]
+
+html_theme = "sphinx_rtd_theme"
+
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
