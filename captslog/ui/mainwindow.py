@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file '.\mainwindow.ui'
-#
-# Created by: PyQt4 UI code generator 4.11.4
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt4 import QtCore, QtGui
 from centralwidget import CentralWidget
 
@@ -25,11 +17,10 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 
-# Main Window GUI
 class Ui_MainWindow(QtGui.QMainWindow):
 
     def setupUi(self, MainWindow):
-        """Setting up Main window UI.
+        """Setting up Main Window GUI
         """
         self.setObjectName(_fromUtf8("MainWindow"))
         self.resize(550, 600)
