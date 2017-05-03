@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -27,7 +27,7 @@ class Entry_Widget(QtGui.QWidget):
     # Entry Layout
     def entry_layout(self, parent):
         self.journalEntryLayout = QtGui.QHBoxLayout()
-        self.journalEntryLayout.setMargin(11)
+        #self.journalEntryLayout.setMargin(11)
         self.journalEntryLayout.setSpacing(6)
         self.journalEntryLayout.setObjectName(_fromUtf8("journalEntryLayout"))
         self.__JournalEntry(parent)
