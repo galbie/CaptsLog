@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 from PySide import QtCore, QtGui
-from mainwindow import Ui_MainWindow
+from captslog.ui.mainwindow import Ui_MainWindow
 import markdown
 
 try:

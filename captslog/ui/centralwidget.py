@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 from entrywidget import Entry_Widget
 from viewwidget import View_Widget
 
@@ -40,12 +40,12 @@ class CentralWidget(QtGui.QWidget):
 	# Horizontal Layout 7, Journal Table, Entry, and View
 	def __HorizLayout(self):
 		self.horizontalLayout_7 = QtGui.QHBoxLayout(self.centralWidget)
-		self.horizontalLayout_7.setMargin(11)
+		#self.horizontalLayout_7.setMargin(11)
 		self.horizontalLayout_7.setSpacing(6)
 		self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
 		
 		self.journalTableLayout = QtGui.QHBoxLayout()
-		self.journalTableLayout.setMargin(11)
+		#self.journalTableLayout.setMargin(11)
 		self.journalTableLayout.setSpacing(6)
 		self.journalTableLayout.setObjectName(_fromUtf8("journalTableLayout"))
 		self.__JournalList()
