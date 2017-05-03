@@ -1,5 +1,5 @@
 from __future__ import absolute_import, unicode_literals
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 from mainwindow import Ui_MainWindow
 import markdown
 
