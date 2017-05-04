@@ -1,4 +1,16 @@
+<<<<<<< HEAD
 from PyQt4 import QtCore, QtGui
+=======
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file '.\mainwindow.ui'
+#
+# Created by: PyQt4 UI code generator 4.11.4
+#
+# WARNING! All changes made in this file will be lost!
+
+from PySide import QtCore, QtGui
+>>>>>>> refs/remotes/jaehoonhwang/master
 from centralwidget import CentralWidget
 
 try:
