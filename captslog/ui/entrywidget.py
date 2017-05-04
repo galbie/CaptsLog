@@ -16,8 +16,6 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 # Journal Entry Class which contains the layout and widget
-
-
 class Entry_Widget(QtGui.QWidget):
 
     def __init__(self, parent):

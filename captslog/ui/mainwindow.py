@@ -20,22 +20,29 @@ except AttributeError:
 class Ui_MainWindow(QtGui.QMainWindow):
 
     def setupUi(self, MainWindow):
-        """Setting up Main Window GUI
-        """
-        self.setObjectName(_fromUtf8("MainWindow"))
-        self.resize(550, 600)
+		self.setObjectName(_fromUtf8("MainWindow"))
+		
+		"""Set up the size of the Window
+		
+		This module sets the window size to be 550 x 600 
+		
+		Note: the size is changable
+		"""
+		self.resize(550, 600)
+		sizePolicy = QtGui.QSizePolicy(
+			QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(
+			self.sizePolicy().hasHeightForWidth())
+		MainWindow.setSizePolicy(sizePolicy)
+		MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
 
-        # Size Policy
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.sizePolicy().hasHeightForWidth())
-
-        # Main Window
-        MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        """Set up the Main Window GUI 
+		
+		This module declares a center_widget, and includes the entry_list, 
+		journal_entry, and the journal_view
+		"""
         MainWindow.setDocumentMode(False)
         self.center_widget = CentralWidget(MainWindow)
         _widget = QtGui.QWidget()
@@ -43,7 +50,6 @@ class Ui_MainWindow(QtGui.QMainWindow):
         _layout.addWidget(self.center_widget)
         MainWindow.setCentralWidget(_widget)
 
-        # Menu Bar
         self.menuBar = QtGui.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 550, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
