@@ -140,6 +140,18 @@ def test_search_entries_by_created_date():
             assert result is not None
 
 
+def test_search_entries_by_id():
+    db_handler = DBHandlerClass()
+    entry = db_handler.support_func_get_all(1)
+    if entry is not None:
+        result = db_handler.search_entries_by_id(
+            entry[0]["_id"])
+        if isinstance(result, bool):
+            assert result
+        else:
+            assert result[0]['_id'] == entry[0]["_id"]
+
+
 def test_search_entries_by_modified_date():
     db_handler = DBHandlerClass()
     date = datetime.datetime.now()
@@ -164,7 +176,7 @@ def test_update_entries():
               "Content": "Content in Markdown File"}
     assert not db_handler.update_entries(
         bson.objectid.ObjectId("111111111111111111111111"), entry1)
-    entry = db_handler.support_func_get_all(1)
+    entry = db_handler.get_all()
     if entry is not None:
         entry = entry[0]
         entry["Title"] = str(entry["Title"]) + str("1")
