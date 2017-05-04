@@ -20,14 +20,10 @@ except AttributeError:
 class Ui_MainWindow(QtGui.QMainWindow):
 
     def setupUi(self, MainWindow):
-		self.setObjectName(_fromUtf8("MainWindow"))
-		
-		"""Set up the size of the Window
-		
-		This module sets the window size to be 550 x 600 
-		
-		Note: the size is changable
+		"""Set up the Main Window.
 		"""
+		self.setObjectName(_fromUtf8("MainWindow"))
+		#Set Window Size.
 		self.resize(550, 600)
 		sizePolicy = QtGui.QSizePolicy(
 			QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -37,19 +33,14 @@ class Ui_MainWindow(QtGui.QMainWindow):
 			self.sizePolicy().hasHeightForWidth())
 		MainWindow.setSizePolicy(sizePolicy)
 		MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
-
-        """Set up the Main Window GUI 
-		
-		This module declares a center_widget, and includes the entry_list, 
-		journal_entry, and the journal_view
-		"""
         MainWindow.setDocumentMode(False)
+		#Set up Central Widget, all layouts and widgets.
         self.center_widget = CentralWidget(MainWindow)
         _widget = QtGui.QWidget()
         _layout = QtGui.QVBoxLayout(_widget)
         _layout.addWidget(self.center_widget)
         MainWindow.setCentralWidget(_widget)
-
+		#Set up a menubar.
         self.menuBar = QtGui.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 550, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
@@ -71,6 +62,11 @@ class Ui_MainWindow(QtGui.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
+		"""Language translation.
+		
+		This function exist in case of multi languages are introduce to tha program.
+		
+		"""
         MainWindow.setWindowTitle(_translate("Captslog", "Captslog", None))
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.actionNew_Entry.setText(

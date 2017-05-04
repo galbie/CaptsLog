@@ -23,12 +23,22 @@ except AttributeError:
 class Main(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
+		"""
+		Args:
+			ui (QMainWindow) : The instance of Ui_MainWindow class.
+		"""
         super(Main, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.center_widget.entry.journalEntry.textChanged.connect(self.text_triggered)
 
     def text_triggered(self):
+		"""Update text to markdown text simultaneously 
+		
+		Args:
+			raw (String) : Recieves the string from entry every time an input is made
+			ntxt (html string) : Converted html string 
+		"""
         raw = self.ui.center_widget.entry.journalEntry.toPlainText()
         md = markdown.Markdown()
         raw = str(raw)

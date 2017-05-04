@@ -17,16 +17,25 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-#Collection of all widgets
 class CentralWidget(QtGui.QWidget):
+	"""Set up the central GUI
+	
+	The CentralWidget consist of three main widgets including the
+	journal list, journal entry, and journal view.
+	
+	"""
 	def __init__(self, parent):
 		super(CentralWidget, self).__init__(parent)
 		self.__CentralWidget()
 		self.__HorizLayout()
 		
-	
-	#Central Widget
 	def __CentralWidget(self):
+		"""Set up central widget
+		
+		The central widget is given a fixed initial sized and 
+		is changable according to the window size.
+		
+		"""
 		self.centralWidget = QtGui.QWidget(self)
 		sizePolicy = QtGui.QSizePolicy(
 			QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
@@ -37,8 +46,13 @@ class CentralWidget(QtGui.QWidget):
 		self.centralWidget.setSizePolicy(sizePolicy)
 		self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
 	
-	# Horizontal Layout 7, Journal Table, Entry, and View
 	def __HorizLayout(self):
+		"""Set up Horizontal Layout
+		
+		This Layout allows all widgets within scales along
+		with the window.
+		
+		"""
 		self.horizontalLayout_7 = QtGui.QHBoxLayout(self.centralWidget)
 		self.horizontalLayout_7.setMargin(11)
 		self.horizontalLayout_7.setSpacing(6)
@@ -58,9 +72,9 @@ class CentralWidget(QtGui.QWidget):
 			
 		self.setLayout(self.horizontalLayout_7)
 		
-	
-	# Journal List
 	def __JournalList(self):
+		"""Journal List widget
+		"""
 		self.journalList = QtGui.QListWidget(self.centralWidget)
 		sizePolicy = QtGui.QSizePolicy(
 			QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
