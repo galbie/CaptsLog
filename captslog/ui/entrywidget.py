@@ -15,26 +15,27 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
+
 class Entry_Widget(QtGui.QWidget):
-	"""Set up Journal Entry.
-	
-	This widget allows users to type in their journal
-	to be converted to markdown format.
-	
-	"""
+    """Set up Journal Entry.
+
+    This widget allows users to type in their journal
+    to be converted to markdown format.
+
+    """
     def __init__(self, parent):
         super(Entry_Widget, self).__init__(parent)
         self.entry_layout(parent)
 
     def entry_layout(self, parent):
-		"""Add box layout for Journal Entry
-		
-		This function adds a box layout in the middle of the central widget 
-		and calls __JournalEntry funtion.
-		
-		"""
+        """Add box layout for Journal Entry
+
+        This function adds a box layout in the middle of the central widget
+        and calls __JournalEntry funtion.
+
+        """
         self.journalEntryLayout = QtGui.QHBoxLayout()
-        #self.journalEntryLayout.setMargin(11)
+        # self.journalEntryLayout.setMargin(11)
         self.journalEntryLayout.setSpacing(6)
         self.journalEntryLayout.setObjectName(_fromUtf8("journalEntryLayout"))
         self.__JournalEntry(parent)
@@ -42,13 +43,13 @@ class Entry_Widget(QtGui.QWidget):
         parent.horizontalLayout_7.addLayout(self.journalEntryLayout)
 
     def __JournalEntry(self, parent):
-		"""Set up QPlainTextEdit
-		
-		This function create a Plain Text Editor as the input for the user.
-		
-		The size of this widget scales along with the window size.
-		
-		"""
+        """Set up QPlainTextEdit
+
+        This function create a Plain Text Editor as the input for the user.
+
+        The size of this widget scales along with the window size.
+
+        """
         self.journalEntry = QtGui.QPlainTextEdit(parent.centralWidget)
         sizePolicy = QtGui.QSizePolicy(
             QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
