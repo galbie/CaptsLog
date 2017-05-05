@@ -23,9 +23,11 @@ class View_Widget(QtGui.QWidget):
 
     """
     def __init__(self, parent):
-        """Call Viewlayout Function.
+        """Initialize Journal View.
 
-        afdafaf
+        Set up the caller function as reference when
+        this class is initiated. Then calls
+        the view_layout function.
 
         """
         super(View_Widget, self).__init__(parent)

@@ -27,9 +27,11 @@ class CentralWidget(QtGui.QWidget):
     """
 
     def __init__(self, parent):
-        """jibersa.
+        """Initialize Central Widget.
 
-        afadgasg
+        Set up the caller function as reference when
+        this class is initiated. Then calls the __CentralWidget
+        function and __HorizLayout function.
 
         """
         super(CentralWidget, self).__init__(parent)
@@ -41,6 +43,11 @@ class CentralWidget(QtGui.QWidget):
 
         The central widget is given a fixed initial sized and
         is changable according to the window size.
+
+        Args:
+            sizePolicy (QSizePolicy) : size policy that defines the initial
+                                        size of the central widget and policy
+                                        changes of the size.
 
         """
         self.centralWidget = QtGui.QWidget(self)

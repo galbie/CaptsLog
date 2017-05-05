@@ -23,12 +23,20 @@ class Entry_Widget(QtGui.QWidget):
     to be converted to markdown format.
 
     """
+
     def __init__(self, parent):
+        """Initialize Journal Entry.
+
+        Set up the caller function as reference when
+        this class is initiated. Then calls
+        the entry_layout function.
+
+        """
         super(Entry_Widget, self).__init__(parent)
         self.entry_layout(parent)
 
     def entry_layout(self, parent):
-        """Add box layout for Journal Entry
+        """Add box layout for Journal Entry.
 
         This function adds a box layout in the middle of the central widget
         and calls __JournalEntry funtion.
@@ -43,7 +51,7 @@ class Entry_Widget(QtGui.QWidget):
         parent.horizontalLayout_7.addLayout(self.journalEntryLayout)
 
     def __JournalEntry(self, parent):
-        """Set up QPlainTextEdit
+        """Set up QPlainTextEdit.
 
         This function create a Plain Text Editor as the input for the user.
 
