@@ -73,7 +73,7 @@ class Main(QtGui.QMainWindow):
         self.text_triggered()
 
     def get_title(self):
-        return "Sample Title"
+        return "Sample Title 1"
 
 if __name__ == "__main__":
     import sys
