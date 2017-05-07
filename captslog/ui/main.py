@@ -113,7 +113,11 @@ class Main(QtGui.QMainWindow):
 <<<<<<< HEAD
 =======
     def get_title(self):
+<<<<<<< HEAD
         return "Sample Title"
+>>>>>>> refs/remotes/origin/master
+=======
+        return "Sample Title 1"
 >>>>>>> refs/remotes/origin/master
 
 if __name__ == "__main__":
