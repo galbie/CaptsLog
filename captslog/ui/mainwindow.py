@@ -1,4 +1,3 @@
-from PyQt4 import QtCore, QtGui
 from PySide import QtCore, QtGui
 from centralwidget import CentralWidget
 
@@ -38,24 +37,27 @@ class Ui_MainWindow(QtGui.QMainWindow):
 
         """
         self.setObjectName(_fromUtf8("MainWindow"))
-        # Set Window Size.
         self.resize(550, 600)
+
+        # Size Policy
         sizePolicy = QtGui.QSizePolicy(
             QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
             self.sizePolicy().hasHeightForWidth())
+
+        # Main Window
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
         MainWindow.setDocumentMode(False)
-        # Set up Central Widget, all layouts and widgets.
         self.center_widget = CentralWidget(MainWindow)
-        _layout = QtGui.QVBoxLayout()
         _widget = QtGui.QWidget()
+        _layout = QtGui.QVBoxLayout(_widget)
         _layout.addWidget(self.center_widget)
         MainWindow.setCentralWidget(_widget)
-        # Set up a menubar.
+
+        # Menu Bar
         self.menuBar = QtGui.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 550, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
@@ -68,11 +70,31 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.statusBar = QtGui.QStatusBar(MainWindow)
         self.statusBar.setObjectName(_fromUtf8("statusBar"))
         MainWindow.setStatusBar(self.statusBar)
+
         self.actionNew_Entry = QtGui.QAction(MainWindow)
         self.actionNew_Entry.setObjectName(_fromUtf8("actionNew_Entry"))
         self.menuFile.addAction(self.actionNew_Entry)
         self.menuBar.addAction(self.menuFile.menuAction())
 
+        self.action_edit_entry = QtGui.QAction(MainWindow)
+        self.action_edit_entry.setObjectName(_fromUtf8("action_Edit_Entry"))
+        self.menuFile.addAction(self.action_edit_entry)
+        self.menuBar.addAction(self.menuFile.menuAction())
+
+        self.action_Save_Entry = QtGui.QAction(MainWindow)
+        self.action_Save_Entry.setObjectName(_fromUtf8("action_Save_Entry"))
+        self.menuFile.addAction(self.action_Save_Entry)
+        self.menuBar.addAction(self.menuFile.menuAction())
+
+        self.action_Delete_Entry = QtGui.QAction(MainWindow)
+        self.action_Delete_Entry.setObjectName(_fromUtf8("action_Delete_Entry"))
+        self.menuFile.addAction(self.action_Delete_Entry)
+        self.menuBar.addAction(self.menuFile.menuAction())
+
+        self.action_Cancel = QtGui.QAction(MainWindow)
+        self.action_Cancel.setObjectName(_fromUtf8("action_Cancel"))
+        self.menuFile.addAction(self.action_Cancel)
+        self.menuBar.addAction(self.menuFile.menuAction())
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -87,3 +109,11 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.actionNew_Entry.setText(
             _translate("MainWindow", "New Entry", None))
+        self.action_edit_entry.setText(
+            _translate("MainWindow", "Edit Entry", None))
+        self.action_Save_Entry.setText(
+            _translate("MainWindow", "Save Entry", None))
+        self.action_Delete_Entry.setText(
+            _translate("MainWindow", "Delete Entry", None))
+        self.action_Cancel.setText(
+            _translate("MainWindow", "Cancel", None))

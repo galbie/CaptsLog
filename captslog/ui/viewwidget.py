@@ -41,7 +41,7 @@ class View_Widget(QtGui.QWidget):
 
         """
         self.journalViewLayout = QtGui.QHBoxLayout()
-        self.journalViewLayout.setMargin(11)
+        #self.journalViewLayout.setMargin(11)
         self.journalViewLayout.setSpacing(6)
         self.journalViewLayout.setObjectName(_fromUtf8("journalViewLayout"))
         self.__JournalView(parent)
