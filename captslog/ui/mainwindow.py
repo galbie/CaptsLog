@@ -1,11 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file '.\mainwindow.ui'
-#
-# Created by: PyQt4 UI code generator 4.11.4
-#
-# WARNING! All changes made in this file will be lost!
-
+from PyQt4 import QtCore, QtGui
 from PySide import QtCore, QtGui
 from centralwidget import CentralWidget
 
@@ -25,34 +18,44 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 
-# Main Window GUI
 class Ui_MainWindow(QtGui.QMainWindow):
+    """MainWindow class
 
+    This is the main class for GUI, it calls initiation from the CentralWidget
+    class, which generates the main content of GUI.
+
+    """
     def setupUi(self, MainWindow):
-        """Setting up Main window UI.
+        """Set up the Main Window.
+
+        This function does three main things: set an initial size
+        for the window, set up the central widget, and the menu bar.
+
+        Attributes:
+            sizePolicy (QSizePolicy) : Window size setting.
+            _layout (QHBoxLayout) : layout for central widget to
+                                    scale along with window.
+
         """
         self.setObjectName(_fromUtf8("MainWindow"))
+        # Set Window Size.
         self.resize(550, 600)
-
-        # Size Policy
         sizePolicy = QtGui.QSizePolicy(
             QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
             self.sizePolicy().hasHeightForWidth())
-
-        # Main Window
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
         MainWindow.setDocumentMode(False)
+        # Set up Central Widget, all layouts and widgets.
         self.center_widget = CentralWidget(MainWindow)
+        _layout = QtGui.QVBoxLayout()
         _widget = QtGui.QWidget()
-        _layout = QtGui.QVBoxLayout(_widget)
         _layout.addWidget(self.center_widget)
         MainWindow.setCentralWidget(_widget)
-
-        # Menu Bar
+        # Set up a menubar.
         self.menuBar = QtGui.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 550, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
@@ -74,6 +77,12 @@ class Ui_MainWindow(QtGui.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
+        """Language translation.
+
+        This function exist in case of multi languages are introduce
+        to the program.
+
+        """
         MainWindow.setWindowTitle(_translate("Captslog", "Captslog", None))
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.actionNew_Entry.setText(
