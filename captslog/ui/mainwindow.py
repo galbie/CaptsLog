@@ -1,4 +1,8 @@
-from PySide import QtCore, QtGui
+<<<<<<< HEAD
+=======
+from PyQt4 import QtCore, QtGui
+# from PySide import QtCore, QtGui
+>>>>>>> refs/remotes/jaehoonhwang/master
 from centralwidget import CentralWidget
 
 try:

@@ -13,6 +13,7 @@ except AttributeError:
 try:
     _encoding = QtGui.QApplication.UnicodeUTF8
 
+
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
@@ -49,8 +50,6 @@ class Main(QtGui.QMainWindow):
         self.ui.action_Delete_Entry.triggered.connect(self.delete_button_action)
         self.ui.center_widget.entry.journalEntry.setReadOnly(True)
         self.refresh_list_view()
-
-
         self.refresh_list_view()
 
     def text_triggered(self):
@@ -79,7 +78,7 @@ class Main(QtGui.QMainWindow):
 
     def remove_all_list(self):
         while self.ui.center_widget.journalList.count() != 0:
-             self.ui.center_widget.journalList.clear()
+            self.ui.center_widget.journalList.clear()
 
     def refresh_list_view(self):
         self.remove_all_list()
@@ -115,7 +114,7 @@ class Main(QtGui.QMainWindow):
         if self.current_selection is not None:
             result = self.db_handler.search_entries_by_id(self.current_selection)[0]
             result["MarkdownFile"] = self.ui.center_widget.entry.journalEntry.toPlainText()
-            self.db_handler.update_entries(self.current_selection,result)
+            self.db_handler.update_entries(self.current_selection, result)
         else:
             self.db_handler.insert_to_entries_table(self.get_title(), [],
                                                     self.ui.center_widget.entry.journalEntry.toPlainText())
@@ -126,8 +125,10 @@ class Main(QtGui.QMainWindow):
         self.ui.center_widget.journalList.setEnabled(True)
         self.refresh_list_view()
 
+
 if __name__ == "__main__":
     import sys
+
     app = QtGui.QApplication(sys.argv)
     Form = Main()
     Form.show()

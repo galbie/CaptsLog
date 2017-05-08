@@ -1,4 +1,4 @@
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from entrywidget import Entry_Widget
 from viewwidget import View_Widget
 
