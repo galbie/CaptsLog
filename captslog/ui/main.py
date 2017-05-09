@@ -1,5 +1,8 @@
 from __future__ import absolute_import, unicode_literals
-from PySide import QtCore, QtGui
+
+from random import randint
+
+from PyQt4 import QtCore, QtGui
 from captslog.db.DBHandler import DBHandlerClass
 from mainwindow import Ui_MainWindow
 import markdown
@@ -48,9 +51,16 @@ class Main(QtGui.QMainWindow):
         self.ui.action_Save_Entry.triggered.connect(self.save_button_action)
         self.ui.action_edit_entry.triggered.connect(self.edit_button_action)
         self.ui.action_Delete_Entry.triggered.connect(self.delete_button_action)
+        self.ui.action_Cancel.triggered.connect(self.action_button_action)
         self.ui.center_widget.entry.journalEntry.setReadOnly(True)
         self.refresh_list_view()
         self.refresh_list_view()
+
+    def action_button_action(self):
+        self.current_selection = None
+        self.ui.center_widget.journalList.setEnabled(True)
+        self.ui.center_widget.entry.journalEntry.setReadOnly(True)
+        self.ui.center_widget.journalList.setEnabled(True)
 
     def text_triggered(self):
         """Update text to markdown text simultaneously.
@@ -125,7 +135,8 @@ class Main(QtGui.QMainWindow):
         self.ui.center_widget.journalList.setEnabled(True)
         self.refresh_list_view()
 
-
+    def get_title(self):
+        return "Title "+ str(randint(1,100))
 if __name__ == "__main__":
     import sys
 
