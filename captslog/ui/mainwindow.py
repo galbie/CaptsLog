@@ -68,14 +68,33 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.statusBar = QtGui.QStatusBar(MainWindow)
         self.statusBar.setObjectName(_fromUtf8("statusBar"))
         MainWindow.setStatusBar(self.statusBar)
+
         self.actionNew_Entry = QtGui.QAction(MainWindow)
         self.actionNew_Entry.setObjectName(_fromUtf8("actionNew_Entry"))
         self.menuFile.addAction(self.actionNew_Entry)
         self.menuBar.addAction(self.menuFile.menuAction())
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.action_edit_entry = QtGui.QAction(MainWindow)
+        self.action_edit_entry.setObjectName(_fromUtf8("action_Edit_Entry"))
+        self.menuFile.addAction(self.action_edit_entry)
+        self.menuBar.addAction(self.menuFile.menuAction())
 
+        self.action_Save_Entry = QtGui.QAction(MainWindow)
+        self.action_Save_Entry.setObjectName(_fromUtf8("action_Save_Entry"))
+        self.menuFile.addAction(self.action_Save_Entry)
+        self.menuBar.addAction(self.menuFile.menuAction())
+
+        self.action_Delete_Entry = QtGui.QAction(MainWindow)
+        self.action_Delete_Entry.setObjectName(_fromUtf8("action_Delete_Entry"))
+        self.menuFile.addAction(self.action_Delete_Entry)
+        self.menuBar.addAction(self.menuFile.menuAction())
+
+        self.action_Cancel = QtGui.QAction(MainWindow)
+        self.action_Cancel.setObjectName(_fromUtf8("action_Cancel"))
+        self.menuFile.addAction(self.action_Cancel)
+        self.menuBar.addAction(self.menuFile.menuAction())
+
+<<<<<<< HEAD
     def retranslateUi(self, MainWindow):
         """Language translation.
 
@@ -84,6 +103,18 @@ class Ui_MainWindow(QtGui.QMainWindow):
 
         """
         MainWindow.setWindowTitle(_translate("Captslog", "Captslog", None))
+=======
+>>>>>>> refs/remotes/origin/master
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.actionNew_Entry.setText(
             _translate("MainWindow", "New Entry", None))
+        self.action_edit_entry.setText(
+            _translate("MainWindow", "Edit Entry", None))
+        self.action_Save_Entry.setText(
+            _translate("MainWindow", "Save Entry", None))
+        self.action_Delete_Entry.setText(
+            _translate("MainWindow", "Delete Entry", None))
+        self.action_Cancel.setText(
+            _translate("MainWindow", "Cancel", None))
+
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
