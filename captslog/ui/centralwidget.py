@@ -1,6 +1,7 @@
 from PyQt4 import QtCore, QtGui
 from entrywidget import Entry_Widget
 from viewwidget import View_Widget
+from listwidget import List_Widget
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -71,14 +72,8 @@ class CentralWidget(QtGui.QWidget):
         self.horizontalLayout_7.setMargin(11)
         self.horizontalLayout_7.setSpacing(6)
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
-
-        self.journalTableLayout = QtGui.QHBoxLayout()
-        self.journalTableLayout.setMargin(11)
-        self.journalTableLayout.setSpacing(6)
-        self.journalTableLayout.setObjectName(_fromUtf8("journalTableLayout"))
-        self.__JournalList()
-        self.journalTableLayout.addWidget(self.journalList)
-        self.horizontalLayout_7.addLayout(self.journalTableLayout)
+		
+		self.list = List_Widget(self)
 
         self.entry = Entry_Widget(self)
 

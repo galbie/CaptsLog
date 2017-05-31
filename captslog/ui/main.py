@@ -42,7 +42,7 @@ class Main(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.ui.center_widget.entry.journalEntry.textChanged.connect(
             self.text_triggered)
-        self.ui.center_widget.journalList.currentItemChanged.connect(
+        self.ui.center_widget.list.journalList.currentItemChanged.connect(
             self.itemChanged)
         results = self.db_handler.get_all()
         for x in results:
