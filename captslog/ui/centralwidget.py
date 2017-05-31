@@ -81,16 +81,3 @@ class CentralWidget(QtGui.QWidget):
 
         self.setLayout(self.horizontalLayout_7)
 
-    def __JournalList(self):
-        """Journal List widget."""
-        self.journalList = QtGui.QListWidget(self.centralWidget)
-        sizePolicy = QtGui.QSizePolicy(
-            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.journalList.sizePolicy().hasHeightForWidth())
-        self.journalList.setSizePolicy(sizePolicy)
-        self.journalList.setMinimumSize(QtCore.QSize(100, 600))
-        self.journalList.setMaximumSize(QtCore.QSize(250, 16777215))
-        self.journalList.setObjectName(_fromUtf8("journalList"))
